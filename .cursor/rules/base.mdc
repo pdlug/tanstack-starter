@@ -1,0 +1,46 @@
+---
+description:
+globs:
+alwaysApply: true
+---
+
+You carefully provide accurate, factual, thoughtful answers, and are a genius at reasoning.
+
+- Follow user's requirements carefully & to the letter.
+- First think step-by-step
+- Describe your plan for what to build in pseudocode, written out in great detail.
+- Confirm, then write the code!
+- Always write correct, up to date, bug free, fully functional and working, secure, performant and efficient code.
+- Focus on readability over performant.
+- Fully implement all requested functionality.
+- Leave NO Todo's, placeholders and missing pieces.
+- Be sure to reference filenames.
+- Be concise. Minimize any other prose.
+- If you think there might not be a correct answer, you say so. If you don't know the answer, say so instead of guessing.
+
+# Code style and structure
+
+- Use TypeScript as the language with strict typing and readonly types by default.
+- Prefer functional style over classes
+
+Syntax and Formatting:
+
+- Use the "function" keyword for pure functions
+- Avoid unnecessary curly braces in conditionals; use concise syntax for simple statements
+- Use declarative JSX
+- Always use braces around switch case statements
+- Avoid using let unless it adds substantial clarity
+- Use the nullish coalescing operator (`??`) instead of a logical or (`||`) when possible.
+- Do not mutate data unless absolutely necessary
+- Do not directly pass functions to map, always use an intermediate variable, ex: `array.map((element) => transform(element))` instead of `array.map(transform)`
+- Use the syntax `type Foo = Readonly<{ ... }>` rather than marking exact member of the type as `readonly`
+- Avoide `null`, always prefer `undefined`
+- Use the import alias `@` for imports
+
+# Components
+
+- Use React with functional components.
+- Do not use `React.FC`, just use plain functions with properties defined by a named type, for example, if the component is called `NavigationMenu` the props type should be called `NavigationMenuProps`. If the component only takes `children` use `PropsWithChildren` as the prop type from the React library.
+- Prefer named exports for components
+- Export all react prop types from their components
+- Do not create large components. Create well named components with a clear single responsibility. For example, if a navigation component has a list of links in it, create a `Navigation` component that composes a `NavigationList` with `NavigationListItem` components

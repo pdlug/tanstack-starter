@@ -1,0 +1,190 @@
+---
+description:
+globs:
+alwaysApply: true
+---
+
+Use TanStack Start which uses TanStack Router for all routing. All routes use the file-based routing structure which uses the name of the route along with the definition in the file with `createFileRoute` to define the route and any parameters. There is no need to update any files other than the route itself when adding new routes.
+
+# Backend, data loading, actions
+
+Use TanStack Start's data loader to perform server side data loading for all initial loading. For example:
+
+```typescript
+export const Route = createFileRoute("/_authed/dashboard")({
+  component: Dashboard,
+  loader: async ({ context }) => {
+    const db = connectToDb(process.env.DATABASE_URL!);
+    const user = await Users.getByClerkId(db, context.clerkUserId);
+    if (!user) throw notFound();
+
+    return { user };
+  },
+});
+
+function Dashboard() {
+  const { user } = Route.useLoaderData();
+}
+```
+
+Use TanStack Start server functions for all backend requiring form handling, data mutation, API calls, etc. Use Zod for any data validation.
+
+For example:
+
+```typescript
+const ContactFormDataSchema = z.object({
+  name: z.string(),
+  email: z.string().email(),
+  message: z.string(),
+});
+
+export const handleContactFormSubmit = createServerFn({
+  method: "POST",
+})
+  .validator((data: unknown) => ContactFormDataSchema.parse(data))
+  .handler(async ({ data: { name, email, message } }) => {
+    await ContactsFormSubmissions.save({ name, email, message });
+    return true;
+  });
+
+function SampleForm() {
+  const form = useForm({
+    defaultValues: {
+      name: "",
+      email: "",
+      message: "",
+    },
+    onSubmit: async ({ value }) => {
+      const response = await handleContactFormSubmit({ data: value });
+    },
+  });
+}
+```
+
+If complex compound operations are required such as calling an API, then updating a database record, then performing another API call they should be defined in `src/services` with the server function cal
+ling a function exported by a module there.
+
+For example, if we have a sign up process that requires the following:
+
+1. Create or update the user in our database.
+2. Call the Loops email API to create a contact
+3. Track in PostHog analytics that a new user has been created
+
+We would create the following a new service in `services/registration.ts` with the following function:
+
+```typescript
+export async function signUp(email: string, clerkId: string) {
+  await Users.createOrUpdate({ email, clerkId });
+  await Loops.createContact(email);
+  await PostHogClient.track("user.created", { email });
+}
+```
+
+Then in our TanStack Server function we could call `signUp` to perform the operation. This ensures our server functions have clear flow with the underlying complexity relegated to well defined services and enable
+s us to easily add testing.
+
+# UI components
+
+- Use Tailwind CSS v4 for styling
+  - Use shorthand classes like `size` they are appropriate, for example: `w-6 h-6` should be `size-6`
+  - Do not use absolute values for sizes and colors unless there is no close equivalent in Tailwind (for example, you need much larger sizes)
+-
+
+# Forms
+
+Use Tanstack Form v1 for all forms with `createFormHook` to define commonly used form fields in a single component and a component per form that uses our `useAppForm` along with the `form.AppField` pattern. This ensures all forms have the same look and feel and we can update the form styling in one place.
+
+For example, we should have a component `form.tsx` which provides our app from with common fields:
+
+```typescript
+import {
+  AnyFieldApi,
+  createFormHook,
+  createFormHookContexts,
+} from "@tanstack/react-form";
+
+const { fieldContext, formContext, useFieldContext } = createFormHookContexts();
+
+type TextFieldProps = Readonly<{
+  label: string;
+  disabled?: boolean;
+}>;
+
+function TextField({ label, disabled }: TextFieldProps) {
+  const field = useFieldContext<string>();
+
+  return (
+    <div>
+      <label htmlFor={field.name}>{label}</label>
+      <input
+        id={field.name}
+        name={field.name}
+        value={field.state.value}
+        onChange={(event) => field.handleChange(event.target.value)}
+        onBlur={field.handleBlur}
+        disabled={disabled}
+      />
+      <FormMessage field={field} />
+    </div>
+  );
+}
+
+export const { useAppForm } = createFormHook({
+  fieldComponents: {
+    TextField,
+  },
+  formComponents: {},
+  fieldContext,
+  formContext,
+});
+```
+
+Using our form component this is what our forms should look like:
+
+```typescript
+import { useAppForm } from "components/form";
+
+const formSchema = z.object({
+  name: z.string().min(2, "Name must be at least 2 characters"),
+  email: z.string().email("Invalid email address"),
+});
+
+export type SignupFormValues = z.infer<typeof formSchema>;
+
+type SignupFormProps = Readonly<{
+  onSubmit: (data: SignupFormValues) => void;
+  initialValues?: SignupFormValues;
+}>;
+
+export function SignupForm({ onSubmit, initialValues }: SignupFormProps) {
+  const form = useAppForm({
+    defaultValues: initialValues || {
+      name: "",
+      email: "",
+    },
+    validators: {
+      onChange: formSchema,
+    },
+    onSubmit: ({ value }) => onSubmit(value)),
+  });
+
+  return (
+    <form
+	    onSubmit={(event) => {
+	      event.preventDefault();
+	      event.stopPropagation();
+	      void form.handleSubmit();
+	    }}
+	    className="space-y-4"
+    >
+      <form.AppField name="name">
+        {(field) => (<field.TextField field={field} label="Name" />)}
+      </form.AppField>
+
+      <form.AppField name="email">
+        {(field) => (<field.TextField field={field} label="Email" />)}
+      </form.AppField>
+    </form>
+  );
+}
+```
