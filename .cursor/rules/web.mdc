@@ -188,3 +188,7 @@ export function SignupForm({ onSubmit, initialValues }: SignupFormProps) {
   );
 }
 ```
+
+# Authentication
+
+We use [Better Auth](https://www.better-auth.com/) for authentication.

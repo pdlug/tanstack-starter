@@ -2,14 +2,20 @@
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "my-app",
   "main": ".output/server/index.mjs",
-  "compatibility_date": "2025-07-16",
-  "compatibility_flags": [
-    "nodejs_compat"
-  ],
+  "compatibility_date": "2025-07-12",
+  "compatibility_flags": ["nodejs_compat"],
   "assets": {
     "directory": ".output/public",
   },
   "observability": {
     "enabled": true,
   },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "tanstack-starter-dev",
+      "database_id": "e07a184d-dc49-49cc-b81e-238e43c74efe",
+      "migrations_dir": "./drizzle",
+    },
+  ],
 }

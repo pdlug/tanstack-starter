@@ -10,8 +10,13 @@ import {
 import appCss from "@/styles/index.css?url";
 
 import { APP_NAME } from "@/config";
+import { getAuthSession } from "@/lib/auth/functions/getAuthSession";
 
 export const Route = createRootRoute({
+  beforeLoad: async () => {
+    const authSession = await getAuthSession();
+    return { authSession };
+  },
   head: () => ({
     meta: [
       {
@@ -28,6 +33,7 @@ export const Route = createRootRoute({
     links: [{ rel: "stylesheet", href: appCss }],
   }),
   component: RootComponent,
+  notFoundComponent: () => <div>Not found</div>,
 });
 
 function RootComponent() {
