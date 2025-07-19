@@ -1,16 +1,15 @@
 /// <reference types="vite/client" />
-import type { ReactNode } from "react";
 import {
-  Outlet,
   createRootRoute,
   HeadContent,
+  Outlet,
   Scripts,
 } from "@tanstack/react-router";
-
-import appCss from "@/styles/index.css?url";
+import type { ReactNode } from "react";
 
 import { APP_NAME } from "@/config";
 import { getAuthSession } from "@/lib/auth/functions/get-auth-session";
+import appCss from "@/styles/index.css?url";
 
 export const Route = createRootRoute({
   beforeLoad: async () => {

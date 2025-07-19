@@ -1,5 +1,7 @@
 import { createFormHook, createFormHookContexts } from "@tanstack/react-form";
 
+import { formatFormErrors } from "@/utils/form-errors";
+
 const { fieldContext, formContext, useFieldContext } = createFormHookContexts();
 
 type TextFieldProps = Readonly<{
@@ -41,7 +43,13 @@ function TextField({
 }
 
 type FormMessageProps = Readonly<{
-  field: any;
+  field: {
+    state: {
+      meta: {
+        errors: readonly unknown[];
+      };
+    };
+  };
 }>;
 
 function FormMessage({ field }: FormMessageProps) {
@@ -49,7 +57,7 @@ function FormMessage({ field }: FormMessageProps) {
 
   return (
     <div className="text-sm text-red-600">
-      {field.state.meta.errors.join(", ")}
+      {formatFormErrors(field.state.meta.errors)}
     </div>
   );
 }

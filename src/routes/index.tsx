@@ -1,12 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { createServerFn } from "@tanstack/react-start";
-
 import { z } from "zod";
 
-import { getBindings } from "@/utils/bindings";
 import { connectToDB } from "@/db/db";
-
 import { posts } from "@/db/schema";
+import { getBindings } from "@/utils/bindings";
 
 const postSchema = z.object({
   title: z.string(),
@@ -73,8 +71,8 @@ function Home() {
 
       <button
         className="rounded-md bg-blue-500 p-2 text-white hover:bg-blue-600"
-        onClick={async () => {
-          await createPost({ data: { title: "Hello", content: "World" } });
+        onClick={() => {
+          void createPost({ data: { title: "Hello", content: "World" } });
         }}
       >
         Add Post

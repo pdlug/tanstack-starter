@@ -1,6 +1,8 @@
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 
+import type { DB } from "@/db/db";
+
 /**
  * CLI-only auth configuration for schema generation
  *
@@ -13,7 +15,7 @@ export const auth = betterAuth({
   emailAndPassword: {
     enabled: true,
   },
-  database: drizzleAdapter(undefined as any, {
+  database: drizzleAdapter(undefined as unknown as DB, {
     provider: "sqlite",
   }),
   plugins: [], // No runtime plugins needed for schema generation

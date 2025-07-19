@@ -12,5 +12,10 @@
       "@/*": ["./src/*"]
     }
   },
-  "include": ["worker-configuration.d.ts", "src"]
+  "include": [
+    "worker-configuration.d.ts",
+    "src",
+    "drizzle.config.ts",
+    "vite.config.ts"
+  ]
 }

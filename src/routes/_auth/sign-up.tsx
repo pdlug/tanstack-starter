@@ -2,8 +2,8 @@ import { createFileRoute } from "@tanstack/react-router";
 import { z } from "zod";
 
 import { useAppForm } from "@/components/form";
-
 import { authClient } from "@/lib/auth/auth-client";
+import { formatFormErrors } from "@/utils/form-errors";
 
 const signupSchema = z
   .object({
@@ -44,7 +44,7 @@ function SignUpPage() {
             //show loading
           },
           onSuccess: () => {
-            globalThis.location.href = "/dashboard";
+            globalThis.location.assign("/dashboard");
           },
           onError: (context) => {
             alert(context.error.message);
@@ -136,7 +136,7 @@ function SignUpPage() {
           {form.state.errors.length > 0 && (
             <div className="rounded-md bg-red-50 p-4">
               <div className="text-sm text-red-700">
-                {form.state.errors.join(", ")}
+                {formatFormErrors(form.state.errors)}
               </div>
             </div>
           )}

@@ -8,6 +8,7 @@ import pluginRouter from "@tanstack/eslint-plugin-router";
 import react from "eslint-plugin-react";
 import reactHooks from "eslint-plugin-react-hooks";
 import reactRefresh from "eslint-plugin-react-refresh";
+import simpleImportSort from "eslint-plugin-simple-import-sort";
 // import tailwind from "eslint-plugin-tailwindcss";
 import vitest from "@vitest/eslint-plugin";
 
@@ -19,7 +20,7 @@ export default tseslint.config(
   ...tseslint.configs.strictTypeChecked,
   ...tseslint.configs.stylisticTypeChecked,
   configPrettier,
-  unicorn.configs["flat/recommended"],
+  unicorn.configs["recommended"],
   functional.configs.externalTypeScriptRecommended,
   functional.configs.lite,
   functional.configs.stylistic,
@@ -38,6 +39,7 @@ export default tseslint.config(
       "dist/**",
       "eslint.config.mjs",
       "src/routeTree.gen.ts",
+      "worker-configuration.d.ts",
     ],
   },
   {
@@ -54,6 +56,7 @@ export default tseslint.config(
     plugins: {
       react,
       "react-hooks": reactHooks,
+      "simple-import-sort": simpleImportSort,
     },
     settings: {
       react: {
@@ -87,13 +90,8 @@ export default tseslint.config(
       "react/react-in-jsx-scope": "off",
       "react/prefer-read-only-props": "error",
       "react/no-unescaped-entities": "off",
-      "sort-imports": [
-        "error",
-        {
-          allowSeparatedGroups: true,
-          ignoreMemberSort: true,
-        },
-      ],
+      "simple-import-sort/imports": "error",
+      "simple-import-sort/exports": "error",
       // "tailwindcss/no-arbitrary-value": "error",
       "unicorn/filename-case": [
         "error",
@@ -137,6 +135,7 @@ export default tseslint.config(
     files: ["src/components/**/*.{js,jsx,ts,tsx}"],
     rules: {
       "functional/immutable-data": "off",
+      "react-refresh/only-export-components": "off",
     },
   },
   {
@@ -154,7 +153,7 @@ export default tseslint.config(
       eslint.configs.recommended,
       configPrettier,
       tseslint.configs.strict,
-      unicorn.configs["flat/recommended"],
+      unicorn.configs["recommended"],
       vitest.configs?.recommended,
     ],
     languageOptions: {

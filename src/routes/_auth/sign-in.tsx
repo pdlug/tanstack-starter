@@ -2,8 +2,8 @@ import { createFileRoute } from "@tanstack/react-router";
 import { z } from "zod";
 
 import { useAppForm } from "@/components/form";
-
 import { authClient } from "@/lib/auth/auth-client";
+import { formatFormErrors } from "@/utils/form-errors";
 
 const signinSchema = z.object({
   email: z.email("Invalid email address"),
@@ -127,7 +127,7 @@ function SignInPage() {
           {form.state.errors.length > 0 && (
             <div className="rounded-md bg-red-50 p-4">
               <div className="text-sm text-red-700">
-                {form.state.errors.join(", ")}
+                {formatFormErrors(form.state.errors)}
               </div>
             </div>
           )}
