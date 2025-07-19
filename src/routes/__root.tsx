@@ -10,7 +10,7 @@ import {
 import appCss from "@/styles/index.css?url";
 
 import { APP_NAME } from "@/config";
-import { getAuthSession } from "@/lib/auth/functions/getAuthSession";
+import { getAuthSession } from "@/lib/auth/functions/get-auth-session";
 
 export const Route = createRootRoute({
   beforeLoad: async () => {
