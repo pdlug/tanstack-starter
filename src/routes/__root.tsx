@@ -10,6 +10,7 @@ import type { ReactNode } from "react";
 import { APP_NAME } from "@/config";
 import { getAuthSession } from "@/lib/auth/functions/get-auth-session";
 import appCss from "@/styles/index.css?url";
+import { Header } from "@/components/header";
 
 export const Route = createRootRoute({
   beforeLoad: async () => {
@@ -44,13 +45,24 @@ function RootComponent() {
 }
 
 function RootDocument({ children }: Readonly<{ children: ReactNode }>) {
+  const { authSession } = Route.useRouteContext();
+
   return (
     <html>
       <head>
         <HeadContent />
       </head>
       <body>
-        {children}
+        <div className="min-h-screen bg-gray-50">
+          <Header
+            isAuthenticated={!!authSession}
+            user={authSession?.user}
+            onClickLogout={() => {}}
+          />
+          <main className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+            {children}
+          </main>
+        </div>
         <Scripts />
       </body>
     </html>

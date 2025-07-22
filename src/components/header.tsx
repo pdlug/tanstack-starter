@@ -1,0 +1,41 @@
+type HeaderProps = Readonly<{
+  isAuthenticated: boolean;
+  onClickLogout: () => void;
+  user?: Readonly<{
+    name: string;
+  }>;
+}>;
+
+export const Header = ({
+  isAuthenticated,
+  user,
+  onClickLogout,
+}: HeaderProps) => {
+  return (
+    <header className="border-b border-gray-200 bg-white shadow-sm">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="flex h-16 items-center justify-between">
+          <div className="flex items-center">
+            <h1 className="text-xl font-semibold text-gray-900">
+              App Framework
+            </h1>
+          </div>
+
+          {isAuthenticated && user ?
+            <div className="flex items-center space-x-4">
+              <div className="flex items-center space-x-2 text-gray-700">
+                <span className="text-sm font-medium">{user.name}</span>
+              </div>
+              <button
+                onClick={onClickLogout}
+                className="flex items-center space-x-1 px-3 py-2 text-sm text-gray-600 transition-colors hover:text-gray-900"
+              >
+                <span>Logout</span>
+              </button>
+            </div>
+          : <div className="text-sm text-gray-500">Not logged in</div>}
+        </div>
+      </div>
+    </header>
+  );
+};

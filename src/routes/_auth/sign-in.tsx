@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 import { z } from "zod";
 
 import { useAppForm } from "@/components/form";
@@ -11,6 +11,11 @@ const signinSchema = z.object({
 });
 
 export const Route = createFileRoute("/_auth/sign-in")({
+  beforeLoad: ({ context: { authSession } }) => {
+    if (authSession) {
+      throw redirect({ to: "/home" });
+    }
+  },
   component: SignInPage,
 });
 
@@ -28,7 +33,7 @@ function SignInPage() {
         {
           email: value.email,
           password: value.password,
-          callbackURL: "/dashboard", // Redirect after successful sign-in
+          callbackURL: "/home", // Redirect after successful sign-in
         },
         {
           onError: (context) => {

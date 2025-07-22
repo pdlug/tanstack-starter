@@ -13,7 +13,7 @@ import { createServerRootRoute } from '@tanstack/react-start/server'
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as AuthedRouteImport } from './routes/_authed'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as AuthedDashboardRouteImport } from './routes/_authed/dashboard'
+import { Route as AuthedHomeRouteImport } from './routes/_authed/home'
 import { Route as AuthSignUpRouteImport } from './routes/_auth/sign-up'
 import { Route as AuthSignInRouteImport } from './routes/_auth/sign-in'
 import { ServerRoute as ApiAuthSplatServerRouteImport } from './routes/api/auth/$'
@@ -29,9 +29,9 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AuthedDashboardRoute = AuthedDashboardRouteImport.update({
-  id: '/dashboard',
-  path: '/dashboard',
+const AuthedHomeRoute = AuthedHomeRouteImport.update({
+  id: '/home',
+  path: '/home',
   getParentRoute: () => AuthedRoute,
 } as any)
 const AuthSignUpRoute = AuthSignUpRouteImport.update({
@@ -54,13 +54,13 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/sign-in': typeof AuthSignInRoute
   '/sign-up': typeof AuthSignUpRoute
-  '/dashboard': typeof AuthedDashboardRoute
+  '/home': typeof AuthedHomeRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/sign-in': typeof AuthSignInRoute
   '/sign-up': typeof AuthSignUpRoute
-  '/dashboard': typeof AuthedDashboardRoute
+  '/home': typeof AuthedHomeRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -68,20 +68,20 @@ export interface FileRoutesById {
   '/_authed': typeof AuthedRouteWithChildren
   '/_auth/sign-in': typeof AuthSignInRoute
   '/_auth/sign-up': typeof AuthSignUpRoute
-  '/_authed/dashboard': typeof AuthedDashboardRoute
+  '/_authed/home': typeof AuthedHomeRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/sign-in' | '/sign-up' | '/dashboard'
+  fullPaths: '/' | '/sign-in' | '/sign-up' | '/home'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/sign-in' | '/sign-up' | '/dashboard'
+  to: '/' | '/sign-in' | '/sign-up' | '/home'
   id:
     | '__root__'
     | '/'
     | '/_authed'
     | '/_auth/sign-in'
     | '/_auth/sign-up'
-    | '/_authed/dashboard'
+    | '/_authed/home'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -128,11 +128,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_authed/dashboard': {
-      id: '/_authed/dashboard'
-      path: '/dashboard'
-      fullPath: '/dashboard'
-      preLoaderRoute: typeof AuthedDashboardRouteImport
+    '/_authed/home': {
+      id: '/_authed/home'
+      path: '/home'
+      fullPath: '/home'
+      preLoaderRoute: typeof AuthedHomeRouteImport
       parentRoute: typeof AuthedRoute
     }
     '/_auth/sign-up': {
@@ -164,11 +164,11 @@ declare module '@tanstack/react-start/server' {
 }
 
 interface AuthedRouteChildren {
-  AuthedDashboardRoute: typeof AuthedDashboardRoute
+  AuthedHomeRoute: typeof AuthedHomeRoute
 }
 
 const AuthedRouteChildren: AuthedRouteChildren = {
-  AuthedDashboardRoute: AuthedDashboardRoute,
+  AuthedHomeRoute: AuthedHomeRoute,
 }
 
 const AuthedRouteWithChildren =

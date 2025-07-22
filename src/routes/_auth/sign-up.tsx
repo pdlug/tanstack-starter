@@ -44,7 +44,7 @@ function SignUpPage() {
             //show loading
           },
           onSuccess: () => {
-            globalThis.location.assign("/dashboard");
+            globalThis.location.assign("/home");
           },
           onError: (context) => {
             alert(context.error.message);
