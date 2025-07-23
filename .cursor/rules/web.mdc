@@ -4,7 +4,45 @@ globs:
 alwaysApply: true
 ---
 
-Use TanStack Start which uses TanStack Router for all routing. All routes use the file-based routing structure which uses the name of the route along with the definition in the file with `createFileRoute` to define the route and any parameters. There is no need to update any files other than the route itself when adding new routes.
+# Routing
+
+Use TanStack Start with TanStack Router's file-based routing. Routes use `createFileRoute` to define the route and parameters. No need to update other files when adding new routes.
+
+Related routes should be grouped together using TanStack Router route groups. Use named groups if they share a URL prefix, use unnamed groups (beginning with underscore) if they are related but do not share a URL prefix.
+
+For example, routes under the URL `/dashboard` would be organized as follows:
+
+- `src/routes/dashboard`
+  - `src/routes/dashboard/index.tsx` - `/dashboard`
+  - `src/routes/dashboard/reports.tsx` - `/dashboard/reports`
+
+and marketing routes which are logically similar but have disparate URLs would be organized as follows:
+
+- `src/routes/_marketing`
+  - `src/routes/_marketing/promos.tsx` - `/promos`
+  - `src/routes/_marketing/referral` - `/referral`
+
+# Components
+
+- Use React with functional components.
+- Do not use `React.FC`, just use plain functions with properties defined by a named type, for example, if the component is called `NavigationMenu` the props type should be called `NavigationMenuProps`. If the component only takes `children` use `PropsWithChildren` as the prop type from the React library.
+- Prefer named exports for components
+- Export all react prop types from their components
+- Do not create large components. Create well named components with a clear single responsibility. For example, if a navigation component has a list of links in it, create a `Navigation` component that composes a `NavigationList` with `NavigationListItem` components
+
+# Import Organization
+
+- External dependencies first
+- `@/` aliases for internal modules
+- Relative imports last
+- Group React imports: `import { type ComponentProps } from 'react'`
+
+# State Management
+
+- Use `useState` for local component state
+- Use `useReducer` for complex state logic
+- Use TanStack Query for server state
+- Avoid prop drilling beyond 3 levels - use context
 
 # Backend, data loading, actions
 
@@ -15,19 +53,18 @@ export const Route = createFileRoute("/_authed/dashboard")({
   component: Dashboard,
   loader: async ({ context }) => {
     const db = connectToDb(process.env.DATABASE_URL!);
-    const user = await Users.getByClerkId(db, context.clerkUserId);
-    if (!user) throw notFound();
+    const posts = await Posts.getAll(db);
 
-    return { user };
+    return { posts };
   },
 });
 
 function Dashboard() {
-  const { user } = Route.useLoaderData();
+  const { posts } = Route.useLoaderData();
 }
 ```
 
-Use TanStack Start server functions for all backend requiring form handling, data mutation, API calls, etc. Use Zod for any data validation.
+Use TanStack Start server functions for all backend functionality (form handling, data mutation, API calls, etc.). Use Zod for any data validation.
 
 For example:
 
@@ -41,10 +78,14 @@ const ContactFormDataSchema = z.object({
 export const handleContactFormSubmit = createServerFn({
   method: "POST",
 })
-  .validator((data: unknown) => ContactFormDataSchema.parse(data))
+  .validator(ContactFormDataSchema)
   .handler(async ({ data: { name, email, message } }) => {
-    await ContactsFormSubmissions.save({ name, email, message });
-    return true;
+    try {
+      await ContactService.submitForm(data);
+      return { success: true };
+    } catch (error) {
+      throw new Error("Failed to submit form");
+    }
   });
 
 function SampleForm() {
@@ -61,34 +102,31 @@ function SampleForm() {
 }
 ```
 
-If complex compound operations are required such as calling an API, then updating a database record, then performing another API call they should be defined in `src/services` with the server function cal
-ling a function exported by a module there.
+If complex compound operations are required such as calling an API, then updating a database record, then performing another API call they should be defined in `src/services` with the server function calling a function exported by a module there.
 
 For example, if we have a sign up process that requires the following:
 
 1. Create or update the user in our database.
-2. Call the Loops email API to create a contact
+2. Call the Resend email API to create a contact
 3. Track in PostHog analytics that a new user has been created
 
-We would create the following a new service in `services/registration.ts` with the following function:
+We would create the following a new service in `src/services/registration.ts` with the following function:
 
 ```typescript
 export async function signUp(email: string, clerkId: string) {
   await Users.createOrUpdate({ email, clerkId });
-  await Loops.createContact(email);
+  await Resend.createContact(email);
   await PostHogClient.track("user.created", { email });
 }
 ```
 
-Then in our TanStack Server function we could call `signUp` to perform the operation. This ensures our server functions have clear flow with the underlying complexity relegated to well defined services and enable
-s us to easily add testing.
+Then in our TanStack Server function we could call `signUp` to perform the operation. This ensures our server functions have clear flow with the underlying complexity relegated to well defined services and enables us to easily add testing.
 
-# UI components
+# Styling
 
 - Use Tailwind CSS v4 for styling
   - Use shorthand classes like `size` they are appropriate, for example: `w-6 h-6` should be `size-6`
-  - Do not use absolute values for sizes and colors unless there is no close equivalent in Tailwind (for example, you need much larger sizes)
--
+  - Do not use absolute values for sizes and colors unless there is no close equivalent in Tailwind (for example, you need much larger sizes or a very specific brand color)
 
 # Forms
 
@@ -142,7 +180,7 @@ export const { useAppForm } = createFormHook({
 Using our form component this is what our forms should look like:
 
 ```typescript
-import { useAppForm } from "components/form";
+import { useAppForm } from "@/components/form";
 
 const formSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
@@ -158,32 +196,38 @@ type SignupFormProps = Readonly<{
 
 export function SignupForm({ onSubmit, initialValues }: SignupFormProps) {
   const form = useAppForm({
-    defaultValues: initialValues || {
+    defaultValues: initialValues ?? {
       name: "",
       email: "",
     },
     validators: {
       onChange: formSchema,
     },
-    onSubmit: ({ value }) => onSubmit(value)),
+    onSubmit: async ({ value }) => {
+      await onSubmit(value);
+    },
   });
 
   return (
     <form
-	    onSubmit={(event) => {
-	      event.preventDefault();
-	      event.stopPropagation();
-	      void form.handleSubmit();
-	    }}
-	    className="space-y-4"
+      onSubmit={(event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        void form.handleSubmit();
+      }}
+      className="space-y-4"
     >
       <form.AppField name="name">
-        {(field) => (<field.TextField field={field} label="Name" />)}
+        {(field) => <field.TextField label="Name" />}
       </form.AppField>
 
       <form.AppField name="email">
-        {(field) => (<field.TextField field={field} label="Email" />)}
+        {(field) => <field.TextField label="Email" />}
       </form.AppField>
+
+      <button type="submit" disabled={!form.state.canSubmit}>
+        Submit
+      </button>
     </form>
   );
 }
@@ -192,3 +236,42 @@ export function SignupForm({ onSubmit, initialValues }: SignupFormProps) {
 # Authentication
 
 We use [Better Auth](https://www.better-auth.com/) for authentication.
+
+The route group `_authed` is preconfigured so that it enforces authentication for all routes nested underneath it. Create any routes that require authentication under this route group.
+
+If access to the user object is needed, it is available in the router context and may be accessed as follows:
+
+```typescript
+function Dashboard() {
+  const { authSession } = Route.useRouteContext();
+
+  // authSession.user is the Better Auth user object
+  return <div>Welcome {authSession.user.email}</div>;
+}
+```
+
+# File Organization
+
+- Components in `src/components/`
+- Business logic in `src/services/`
+- Types in same file as implementation
+- Shared types in `src/types/`
+
+# Accessibility
+
+- Use semantic HTML elements first
+- Include ARIA labels for interactive elements
+- Ensure keyboard navigation works
+- Test with screen readers
+
+# Loading & Error States
+
+- Use Suspense for data loading
+- Implement error boundaries at route level
+- Show loading skeletons, not spinners
+
+# Performance
+
+- Use React.memo sparingly, only for expensive renders
+- Prefer server-side data fetching
+- Use TanStack Query for client-side caching when needed
