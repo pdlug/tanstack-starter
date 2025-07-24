@@ -1,4 +1,7 @@
 /// <reference types="vite/client" />
+// Import global middleware to ensure it's loaded
+import "@/global-middleware";
+
 import {
   createRootRoute,
   HeadContent,
