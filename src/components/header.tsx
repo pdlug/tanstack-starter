@@ -1,4 +1,8 @@
-type HeaderProps = Readonly<{
+import { Link } from "@tanstack/react-router";
+
+import { APP_NAME } from "@/config";
+
+export type HeaderProps = Readonly<{
   isAuthenticated: boolean;
   onClickLogout: () => void;
   user?: Readonly<{
@@ -6,19 +10,17 @@ type HeaderProps = Readonly<{
   }>;
 }>;
 
-export const Header = ({
-  isAuthenticated,
-  user,
-  onClickLogout,
-}: HeaderProps) => {
+export function Header({ isAuthenticated, user, onClickLogout }: HeaderProps) {
   return (
     <header className="border-b border-gray-200 bg-white shadow-sm">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between">
           <div className="flex items-center">
-            <h1 className="text-xl font-semibold text-gray-900">
-              App Framework
-            </h1>
+            <Link to="/">
+              <h1 className="text-xl font-semibold text-gray-900">
+                {APP_NAME}
+              </h1>
+            </Link>
           </div>
 
           {isAuthenticated && user ?
@@ -33,9 +35,23 @@ export const Header = ({
                 <span>Logout</span>
               </button>
             </div>
-          : <div className="text-sm text-gray-500">Not logged in</div>}
+          : <div className="flex items-center space-x-4">
+              <Link
+                to="/sign-in"
+                className="text-sm text-gray-600 hover:text-gray-900"
+              >
+                Sign In
+              </Link>
+              <Link
+                to="/sign-up"
+                className="text-sm text-gray-600 hover:text-gray-900"
+              >
+                Sign Up
+              </Link>
+            </div>
+          }
         </div>
       </div>
     </header>
   );
-};
+}

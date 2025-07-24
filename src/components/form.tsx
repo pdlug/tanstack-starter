@@ -4,7 +4,7 @@ import { formatFormErrors } from "@/utils/form-errors";
 
 const { fieldContext, formContext, useFieldContext } = createFormHookContexts();
 
-type TextFieldProps = Readonly<{
+export type TextFieldProps = Readonly<{
   label: string;
   type?: "text" | "email" | "password";
   disabled?: boolean;
@@ -42,7 +42,7 @@ function TextField({
   );
 }
 
-type FormMessageProps = Readonly<{
+export type FormMessageProps = Readonly<{
   field: {
     state: {
       meta: {

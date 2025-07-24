@@ -44,20 +44,6 @@ function Home() {
     <div className="p-8">
       <div className="mb-8 flex items-center justify-between">
         <h1 className="text-3xl font-bold">Hello World</h1>
-        <div className="space-x-4">
-          <a
-            href="/sign-in"
-            className="rounded-md bg-blue-600 px-4 py-2 text-white hover:bg-blue-500"
-          >
-            Sign In
-          </a>
-          <a
-            href="/sign-up"
-            className="rounded-md bg-green-600 px-4 py-2 text-white hover:bg-green-500"
-          >
-            Sign Up
-          </a>
-        </div>
       </div>
 
       <div className="mb-8 space-y-4">

@@ -1,4 +1,5 @@
 import { createFileRoute, redirect } from "@tanstack/react-router";
+import { useState } from "react";
 import { z } from "zod";
 
 import { useAppForm } from "@/components/form";
@@ -20,6 +21,8 @@ export const Route = createFileRoute("/_auth/sign-in")({
 });
 
 function SignInPage() {
+  const [authError, setAuthError] = useState<string | undefined>();
+
   const form = useAppForm({
     defaultValues: {
       email: "",
@@ -29,6 +32,7 @@ function SignInPage() {
       onChange: signinSchema,
     },
     onSubmit: async ({ value }) => {
+      setAuthError(undefined);
       await authClient.signIn.email(
         {
           email: value.email,
@@ -37,8 +41,7 @@ function SignInPage() {
         },
         {
           onError: (context) => {
-            // Display error message
-            alert(context.error.message);
+            setAuthError(context.error.message);
           },
         },
       );
@@ -129,10 +132,10 @@ function SignInPage() {
             </button>
           </div>
 
-          {form.state.errors.length > 0 && (
+          {(form.state.errors.length > 0 || authError) && (
             <div className="rounded-md bg-red-50 p-4">
               <div className="text-sm text-red-700">
-                {formatFormErrors(form.state.errors)}
+                {authError ?? formatFormErrors(form.state.errors)}
               </div>
             </div>
           )}

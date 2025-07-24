@@ -4,13 +4,15 @@ import {
   HeadContent,
   Outlet,
   Scripts,
+  useNavigate,
 } from "@tanstack/react-router";
 import type { ReactNode } from "react";
 
+import { Header } from "@/components/header";
 import { APP_NAME } from "@/config";
+import { authClient } from "@/lib/auth/auth-client";
 import { getAuthSession } from "@/lib/auth/functions/get-auth-session";
 import appCss from "@/styles/index.css?url";
-import { Header } from "@/components/header";
 
 export const Route = createRootRoute({
   beforeLoad: async () => {
@@ -46,6 +48,12 @@ function RootComponent() {
 
 function RootDocument({ children }: Readonly<{ children: ReactNode }>) {
   const { authSession } = Route.useRouteContext();
+  const navigate = useNavigate();
+
+  function handleLogout() {
+    void authClient.signOut();
+    void navigate({ to: "/" });
+  }
 
   return (
     <html>
@@ -57,7 +65,7 @@ function RootDocument({ children }: Readonly<{ children: ReactNode }>) {
           <Header
             isAuthenticated={!!authSession}
             user={authSession?.user}
-            onClickLogout={() => {}}
+            onClickLogout={handleLogout}
           />
           <main className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
             {children}
