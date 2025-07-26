@@ -1,8 +1,9 @@
 import { createMiddleware } from "@tanstack/react-start";
 import { getWebRequest } from "@tanstack/react-start/server";
 
-import { auth } from "@/lib/auth/auth";
 import { connectToDB } from "@/db/db";
+import { auth } from "@/lib/auth/auth";
+
 import { getBindings } from "../../utils/bindings";
 
 // Global middleware that fetches session once for all routes

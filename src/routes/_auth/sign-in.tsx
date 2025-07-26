@@ -12,9 +12,12 @@ const signinSchema = z.object({
 });
 
 export const Route = createFileRoute("/_auth/sign-in")({
-  beforeLoad: ({ context: { authSession } }) => {
+  validateSearch: z.object({
+    redirect: z.string().optional(),
+  }),
+  beforeLoad: ({ context: { authSession }, search }) => {
     if (authSession) {
-      throw redirect({ to: "/home" });
+      throw redirect({ to: search.redirect ?? "/home" });
     }
   },
   component: SignInPage,
@@ -22,6 +25,7 @@ export const Route = createFileRoute("/_auth/sign-in")({
 
 function SignInPage() {
   const [authError, setAuthError] = useState<string | undefined>();
+  const { redirect } = Route.useSearch();
 
   const form = useAppForm({
     defaultValues: {
@@ -37,7 +41,7 @@ function SignInPage() {
         {
           email: value.email,
           password: value.password,
-          callbackURL: "/home", // Redirect after successful sign-in
+          callbackURL: redirect ?? "/home", // Redirect after successful sign-in
         },
         {
           onError: (context) => {

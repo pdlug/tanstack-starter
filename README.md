@@ -9,15 +9,18 @@ A modern full-stack application built with TanStack Start, featuring authenticat
 - **Drizzle ORM** - Type-safe database queries
 - **Cloudflare D1** - Serverless SQLite database
 - **TanStack Form** - Type-safe form handling
-- **Tailwind CSS v4** - Modern styling
+- **Tailwind CSS v4** - for styling with only a bare bones layout included, add your own component system or be yet another app that uses [shadcn/ui](https://ui.shadcn.com/)
 - **TypeScript** - Full type safety
+
+## Design
+
+Server functions - why have a separate API layer only your app is going to use it?
 
 ## Prerequisites
 
 - **Node.js** 18+
 - **pnpm** (recommended package manager)
 - **Cloudflare account** (for deployment)
-- **Wrangler CLI** installed globally: `npm install -g wrangler`
 
 ## Setup
 
