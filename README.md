@@ -43,7 +43,7 @@ You'll need separate databases for development and production.
 npx wrangler d1 create tanstack-starter-dev
 
 # This will output database info including the database_id
-# Copy the database_id for your wrangler.jsonc
+# Copy the database_id to your wrangler.jsonc
 ```
 
 #### Production Database
@@ -60,12 +60,6 @@ npx wrangler d1 create tanstack-starter-prod
 Create a `.env` file in the root directory:
 
 ```env
-# Database (for local D1 development)
-DATABASE_URL="http://127.0.0.1:8787"
-
-# Base URL for your application
-VITE_BASE_URL="http://localhost:3000"
-
 # Better Auth secret (generate a secure random string)
 BETTER_AUTH_SECRET="your-super-secret-auth-key-here"
 ```
@@ -151,7 +145,6 @@ npx wrangler d1 migrations apply tanstack-starter-prod
 ```bash
 # Set production secrets
 npx wrangler secret put BETTER_AUTH_SECRET
-npx wrangler secret put VITE_BASE_URL
 ```
 
 ### 4. Deploy Application

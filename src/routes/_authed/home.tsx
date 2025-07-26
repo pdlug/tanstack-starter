@@ -3,7 +3,8 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 
 import { createPostForUser, getPostsForUser } from "@/db/posts";
-import { authMiddleware, dbMiddleware } from "@/lib/auth/middleware";
+import { authMiddleware } from "@/lib/auth/middleware";
+import { dbMiddleware } from "@/lib/middleware";
 
 const postSchema = z.object({
   title: z.string(),

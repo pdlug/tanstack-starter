@@ -1,5 +1,6 @@
 import { Link } from "@tanstack/react-router";
 
+import { Button } from "@/components/button";
 import { APP_NAME } from "@/config";
 
 export type HeaderProps = Readonly<{
@@ -25,12 +26,14 @@ export function Header({ isAuthenticated, user, onClickLogout }: HeaderProps) {
 
           {isAuthenticated && user ?
             <div className="flex items-center space-x-4">
-              <div className="flex items-center space-x-2 text-gray-700">
-                <span className="text-sm font-medium">{user.name}</span>
-              </div>
+              <Link to="/home">
+                <Button size="sm" variant="primary">
+                  Go to app
+                </Button>
+              </Link>
               <button
                 onClick={onClickLogout}
-                className="flex items-center space-x-1 px-3 py-2 text-sm text-gray-600 transition-colors hover:text-gray-900"
+                className="flex items-center space-x-1 px-3 py-2 text-sm font-semibold text-gray-700 transition-colors hover:text-gray-400"
               >
                 <span>Logout</span>
               </button>
@@ -38,15 +41,12 @@ export function Header({ isAuthenticated, user, onClickLogout }: HeaderProps) {
           : <div className="flex items-center space-x-4">
               <Link
                 to="/sign-in"
-                className="text-sm text-gray-600 hover:text-gray-900"
+                className="text-sm font-semibold text-gray-700 hover:text-gray-400"
               >
                 Sign In
               </Link>
-              <Link
-                to="/sign-up"
-                className="text-sm text-gray-600 hover:text-gray-900"
-              >
-                Sign Up
+              <Link to="/sign-up">
+                <Button size="sm">Sign Up</Button>
               </Link>
             </div>
           }

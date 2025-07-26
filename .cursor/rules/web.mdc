@@ -127,6 +127,8 @@ Then in our TanStack Server function we could call `signUp` to perform the opera
 - Use Tailwind CSS v4 for styling
   - Use shorthand classes like `size` they are appropriate, for example: `w-6 h-6` should be `size-6`
   - Do not use absolute values for sizes and colors unless there is no close equivalent in Tailwind (for example, you need much larger sizes or a very specific brand color)
+- Use class-variance-authority to create components that have variants and overridable classes
+- Use the `cn` utility from `lib/utils/tailwind.css` to compose classes (this uses `clsx` and tailwind merge to ensure they are combined properly)
 
 # Forms
 
