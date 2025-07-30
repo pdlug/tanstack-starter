@@ -163,14 +163,15 @@ This will:
 
 ```
 src/
-├── components/          # Reusable UI components
+├── components/        # Reusable UI components
 ├── db/
-│   ├── schema/         # Drizzle database schemas
+│   ├── schema/        # Drizzle database schemas
 │   └── db.ts          # Database connection
 ├── env/               # Environment variable validation
 ├── lib/
 │   └── auth/          # Better Auth configuration
 ├── routes/            # File-based routes
+|── services/          # Business logic
 ├── styles/            # Global styles
 └── utils/             # Utility functions
 ```

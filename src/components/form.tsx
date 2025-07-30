@@ -42,6 +42,39 @@ function TextField({
   );
 }
 
+export type TextAreaProps = Readonly<{
+  label: string;
+  disabled?: boolean;
+  placeholder?: string;
+  rows?: number;
+}>;
+
+function TextArea({ label, disabled, placeholder, rows = 4 }: TextAreaProps) {
+  const field = useFieldContext<string>();
+
+  return (
+    <div className="space-y-2">
+      <label htmlFor={field.name} className="block text-sm font-medium">
+        {label}
+      </label>
+      <textarea
+        id={field.name}
+        name={field.name}
+        value={field.state.value}
+        onChange={(event) => {
+          field.handleChange(event.target.value);
+        }}
+        onBlur={field.handleBlur}
+        disabled={disabled}
+        placeholder={placeholder}
+        rows={rows}
+        className="resize-vertical w-full rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none"
+      />
+      <FormMessage field={field} />
+    </div>
+  );
+}
+
 export type FormMessageProps = Readonly<{
   field: {
     state: {
@@ -65,6 +98,7 @@ function FormMessage({ field }: FormMessageProps) {
 export const { useAppForm } = createFormHook({
   fieldComponents: {
     TextField,
+    TextArea,
   },
   formComponents: {},
   fieldContext,

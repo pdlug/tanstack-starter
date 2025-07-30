@@ -1,10 +1,7 @@
 import { createMiddleware } from "@tanstack/react-start";
 import { getWebRequest } from "@tanstack/react-start/server";
 
-import { connectToDB } from "@/db/db";
 import { auth } from "@/lib/auth/auth";
-
-import { getBindings } from "../../utils/bindings";
 
 // Global middleware that fetches session once for all routes
 export const sessionMiddleware = createMiddleware({ type: "function" }).server(
@@ -37,14 +34,3 @@ export const authMiddleware = createMiddleware({ type: "function" })
       },
     });
   });
-
-export const dbMiddleware = createMiddleware({ type: "function" }).server(
-  async ({ next }) => {
-    const env = getBindings();
-    const db = connectToDB(env.DB);
-
-    return next({
-      context: { db },
-    });
-  },
-);
