@@ -1,5 +1,5 @@
 import { cva, type VariantProps } from "class-variance-authority";
-import { type ButtonHTMLAttributes } from "react";
+import type { PropsWithChildren, ButtonHTMLAttributes } from "react";
 
 import { cn } from "@/utils/tailwind";
 
@@ -28,11 +28,11 @@ const buttonVariants = cva(
   },
 );
 
-export type ButtonProps = Readonly<{
-  children: React.ReactNode;
-}> &
-  VariantProps<typeof buttonVariants> &
-  ButtonHTMLAttributes<HTMLButtonElement>;
+export type ButtonProps = Readonly<
+  PropsWithChildren &
+    VariantProps<typeof buttonVariants> &
+    ButtonHTMLAttributes<HTMLButtonElement>
+>;
 
 export function Button({
   children,

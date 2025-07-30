@@ -13,7 +13,9 @@ const timestamps = {
 };
 
 export const posts = sqliteTable("posts", {
-  id: text().primaryKey(),
+  id: text("id", { length: 36 })
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
   title: text().notNull(),
   content: text().notNull(),
   userId: text("user_id")

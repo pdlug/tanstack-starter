@@ -10,10 +10,9 @@ export function getPostsForUser(db: DB, userId: string) {
 export function createPostForUser(
   db: DB,
   userId: string,
-  post: Omit<NewPost, "id" | "userId">,
+  post: Omit<NewPost, "userId">,
 ) {
   return db.insert(posts).values({
-    id: crypto.randomUUID(),
     title: post.title,
     content: post.content,
     userId,
