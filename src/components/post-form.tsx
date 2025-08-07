@@ -27,7 +27,7 @@ export function PostForm({ onSubmit, isSubmitting }: PostFormProps) {
       content: "",
     },
     validators: {
-      onChange: postFormSchema,
+      onBlur: postFormSchema,
     },
     onSubmit: async ({ value }) => {
       await onSubmit(value);

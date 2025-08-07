@@ -51,4 +51,4 @@ yarn-error.log
 .aider*
 
 .nitro/
-.tanstack/
+.tanstack-start/

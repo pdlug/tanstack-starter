@@ -80,13 +80,15 @@ export type FormMessageProps = Readonly<{
     state: {
       meta: {
         errors: readonly unknown[];
+        isTouched: boolean;
       };
     };
   };
 }>;
 
 function FormMessage({ field }: FormMessageProps) {
-  if (field.state.meta.errors.length === 0) return;
+  if (field.state.meta.errors.length === 0 || !field.state.meta.isTouched)
+    return;
 
   return (
     <div className="text-sm text-red-600">

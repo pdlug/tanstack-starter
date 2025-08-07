@@ -119,7 +119,7 @@ This starts the Vite development server at `http://localhost:3000`.
 pnpm run db:generate
 
 # Apply migrations locally
-npx wrangler d1 migrations apply tanstack-starter-dev --local
+pnpm run db:migrate:local
 
 # View local database
 npx wrangler d1 execute tanstack-starter-dev --local --command "SELECT * FROM users"
@@ -137,6 +137,8 @@ For production deployment, update your `wrangler.jsonc` with the production data
 
 ```bash
 # Apply any pending migrations to production
+pnpm run db:migrate:remote
+# or
 npx wrangler d1 migrations apply tanstack-starter-prod
 ```
 
