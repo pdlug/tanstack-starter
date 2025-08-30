@@ -52,3 +52,4 @@ yarn-error.log
 
 .nitro/
 .tanstack-start/
+.tanstack/

@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { z } from "zod";
 
-import { useAppForm } from "@/components/form";
+import { useAppForm } from "@/components/Form";
 import { authClient } from "@/lib/auth/auth-client";
 import { formatFormErrors } from "@/utils/form-errors";
 

@@ -1,21 +1,23 @@
 /// <reference types="vite/client" />
-// Import global middleware to ensure it's loaded
-import "@/global-middleware";
 
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import {
   createRootRoute,
   HeadContent,
   Outlet,
   Scripts,
-  useNavigate,
+  useRouter,
 } from "@tanstack/react-router";
 import type { ReactNode } from "react";
 
-import { Header } from "@/components/header";
+import { Header } from "@/components/Header";
 import { APP_NAME } from "@/config";
 import { authClient } from "@/lib/auth/auth-client";
 import { getAuthSession } from "@/lib/auth/functions/get-auth-session";
 import appCss from "@/styles/index.css?url";
+import type { MaybeAuthSession } from "@/types/auth";
+
+const queryClient = new QueryClient();
 
 export const Route = createRootRoute({
   beforeLoad: async () => {
@@ -43,20 +45,26 @@ export const Route = createRootRoute({
 
 function RootComponent() {
   return (
-    <RootDocument>
-      <Outlet />
-    </RootDocument>
+    <QueryClientProvider client={queryClient}>
+      <RootDocument>
+        <Outlet />
+      </RootDocument>
+    </QueryClientProvider>
   );
 }
 
 function RootDocument({ children }: Readonly<{ children: ReactNode }>) {
-  const { authSession } = Route.useRouteContext();
-  const navigate = useNavigate();
+  const { authSession }: { authSession: MaybeAuthSession } =
+    Route.useRouteContext();
+  const router = useRouter();
 
   function handleLogout() {
     void authClient.signOut();
-    void navigate({ to: "/" });
+    router.history.push("/");
   }
+
+  const user = authSession?.user;
+  const headerUser = user?.email ? { ...user, email: user.email } : undefined;
 
   return (
     <html>
@@ -67,8 +75,8 @@ function RootDocument({ children }: Readonly<{ children: ReactNode }>) {
         <div className="min-h-screen bg-gray-50">
           <Header
             isAuthenticated={!!authSession}
-            user={authSession?.user}
             onClickLogout={handleLogout}
+            {...(headerUser && { user: headerUser })}
           />
           <main className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
             {children}

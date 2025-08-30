@@ -9,7 +9,7 @@ import react from "eslint-plugin-react";
 import reactHooks from "eslint-plugin-react-hooks";
 import reactRefresh from "eslint-plugin-react-refresh";
 import simpleImportSort from "eslint-plugin-simple-import-sort";
-// import tailwind from "eslint-plugin-tailwindcss";
+
 import vitest from "@vitest/eslint-plugin";
 
 import tseslint from "typescript-eslint";
@@ -27,9 +27,7 @@ export default tseslint.config(
   ...pluginRouter.configs["flat/recommended"],
   react.configs.flat.recommended,
   react.configs.flat["jsx-runtime"],
-  reactRefresh.configs.recommended,
-  // reactHooks.configs.recommended,
-  // ...tailwind.configs["flat/recommended"],
+
   {
     ignores: [
       ".output/**",
@@ -56,6 +54,7 @@ export default tseslint.config(
     plugins: {
       react,
       "react-hooks": reactHooks,
+      "react-refresh": reactRefresh,
       "simple-import-sort": simpleImportSort,
     },
     settings: {
@@ -90,9 +89,12 @@ export default tseslint.config(
       "react/react-in-jsx-scope": "off",
       "react/prefer-read-only-props": "error",
       "react/no-unescaped-entities": "off",
+      "react-hooks/rules-of-hooks": "error",
+      "react-hooks/exhaustive-deps": "warn",
+      "react-refresh/only-export-components": "warn",
       "simple-import-sort/imports": "error",
       "simple-import-sort/exports": "error",
-      // "tailwindcss/no-arbitrary-value": "error",
+
       "unicorn/filename-case": [
         "error",
         {
@@ -145,17 +147,48 @@ export default tseslint.config(
       // Tanstack Router uses errors for notFound and other exceptions
       "functional/no-throw-statements": "off",
       "react/no-unescaped-entities": "off",
+      // TanStack Start server functions have type issues
+      "@typescript-eslint/no-unsafe-call": "off",
+      "@typescript-eslint/no-unsafe-member-access": "off",
+    },
+  },
+  {
+    files: ["src/routes/_authed/home.tsx"],
+    rules: {
+      "@typescript-eslint/no-unsafe-assignment": "off",
+      "@typescript-eslint/no-unsafe-call": "off",
+      "@typescript-eslint/no-unsafe-argument": "off",
+      "@typescript-eslint/prefer-optional-chain": "off",
+      "@typescript-eslint/no-unnecessary-condition": "off",
+      "functional/prefer-immutable-types": "off",
+    },
+  },
+  {
+    files: [
+      "src/global-middleware.ts",
+      "src/lib/auth/**/*.ts",
+      "src/lib/middleware.ts",
+      "src/routes/api/auth/$.ts",
+    ],
+    rules: {
+      // TanStack Start framework has type issues
+      "@typescript-eslint/no-unsafe-call": "off",
+      "@typescript-eslint/no-unsafe-assignment": "off",
+      "@typescript-eslint/no-unsafe-member-access": "off",
+      "@typescript-eslint/no-unsafe-argument": "off",
+      "functional/prefer-immutable-types": "off",
     },
   },
   {
     files: ["tests/**/*.{js,jsx,ts,tsx}"],
-    extends: [
-      eslint.configs.recommended,
-      configPrettier,
-      tseslint.configs.strict,
-      unicorn.configs["recommended"],
-      vitest.configs?.recommended,
-    ],
+    plugins: {
+      vitest,
+    },
+    rules: {
+      ...tseslint.configs.strict.rules,
+      ...unicorn.configs["recommended"].rules,
+      ...vitest.configs.recommended.rules,
+    },
     languageOptions: {
       parser: tseslint.parser,
       parserOptions: { project: true },

@@ -1,11 +1,18 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { useMutation } from "@tanstack/react-query";
+import { createFileRoute, useRouter } from "@tanstack/react-router";
 import { createServerFn } from "@tanstack/react-start";
-import { useState } from "react";
 import { z } from "zod";
 
-import { PostForm, type PostFormValues } from "@/components/post-form";
+import type { PostFormValues } from "@/components/PostForm";
+import { PostForm } from "@/components/PostForm";
 import { createPostForUser, getPostsForUser } from "@/db/posts";
+import type { Post } from "@/db/schema";
 import { authMiddleware } from "@/lib/auth/middleware";
+import {
+  DatabaseError,
+  PostCreationError,
+  UnauthorizedError,
+} from "@/lib/errors";
 import { dbMiddleware } from "@/lib/middleware";
 
 const postSchema = z.object({
@@ -15,40 +22,84 @@ const postSchema = z.object({
 
 const createPost = createServerFn({ method: "POST" })
   .middleware([authMiddleware, dbMiddleware])
-  .validator(postSchema)
-  .handler(async ({ data: post, context: { db, authSession } }) => {
-    await createPostForUser(db, authSession.user.id, post);
+  .inputValidator(postSchema)
+  .handler(async ({ data: post, context }) => {
+    if (!context.authSession || !context.authSession.user?.id) {
+      throw new UnauthorizedError("Authentication required");
+    }
+    if (!context.db) {
+      throw new DatabaseError("Database connection unavailable");
+    }
+
+    const result = await createPostForUser(
+      context.db,
+      context.authSession.user.id,
+      post,
+    );
+
+    if (!result.success) {
+      throw result.error;
+    }
+
+    return result.data;
   });
 
 const getPosts = createServerFn({ method: "GET" })
   .middleware([authMiddleware, dbMiddleware])
-  .handler(async ({ context: { db, authSession } }) => {
-    return getPostsForUser(db, authSession.user.id);
+  .handler(async ({ context }): Promise<Post[]> => {
+    if (!context.authSession || !context.authSession.user?.id) {
+      throw new UnauthorizedError("Authentication required");
+    }
+    if (!context.db) {
+      throw new DatabaseError("Database connection unavailable");
+    }
+
+    const result = await getPostsForUser(
+      context.db,
+      context.authSession.user.id,
+    );
+
+    if (!result.success) {
+      throw result.error;
+    }
+
+    return result.data;
   });
+
+// Zero-arg consumer wrapper to keep callsites clean
+const fetchPosts = () =>
+  getPosts({ data: undefined } as unknown as Parameters<typeof getPosts>[0]);
 
 export const Route = createFileRoute("/_authed/home")({
   component: Home,
   loader: async () => {
-    const posts = await getPosts();
+    const posts = (await fetchPosts()) as Post[];
     return { posts };
   },
 });
 
+const createPostFetch = (data: PostFormValues) =>
+  createPost({ data } as Parameters<typeof createPost>[0]);
+
 function Home() {
   const { authSession } = Route.useRouteContext();
   const { posts } = Route.useLoaderData();
-  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const router = useRouter();
+
+  const { mutateAsync, isPending } = useMutation({
+    mutationFn: (_options: { data: PostFormValues }) =>
+      createPostFetch(_options.data),
+    onSuccess: () => {
+      void router.invalidate();
+    },
+  });
 
   async function handlePostSubmit(data: PostFormValues) {
-    setIsSubmitting(true);
     try {
-      await createPost({ data });
-      // Refresh the page to show the new post
-      globalThis.location.reload();
+      await mutateAsync({ data });
     } catch (error) {
-      console.error("Failed to create post:", error);
-    } finally {
-      setIsSubmitting(false);
+      throw new PostCreationError("Failed to submit post", { cause: error });
     }
   }
 
@@ -59,7 +110,7 @@ function Home() {
       </div>
 
       <div className="mb-8">
-        <PostForm onSubmit={handlePostSubmit} isSubmitting={isSubmitting} />
+        <PostForm onSubmit={handlePostSubmit} isSubmitting={isPending} />
       </div>
 
       <div className="space-y-4">
@@ -68,7 +119,7 @@ function Home() {
           <p className="text-gray-500">
             No posts yet. Create your first post above!
           </p>
-        : posts.map((post) => (
+        : posts.map((post: Post) => (
             <div key={post.id} className="rounded-lg border p-4">
               <h3 className="text-xl font-semibold">{post.title}</h3>
               <p className="whitespace-pre-wrap text-gray-600">

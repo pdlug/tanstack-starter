@@ -2,7 +2,7 @@ import { createFileRoute, redirect } from "@tanstack/react-router";
 import { useState } from "react";
 import { z } from "zod";
 
-import { useAppForm } from "@/components/form";
+import { useAppForm } from "@/components/Form";
 import { authClient } from "@/lib/auth/auth-client";
 import { formatFormErrors } from "@/utils/form-errors";
 
@@ -25,7 +25,7 @@ export const Route = createFileRoute("/_auth/sign-in")({
 
 function SignInPage() {
   const [authError, setAuthError] = useState<string | undefined>();
-  const { redirect } = Route.useSearch();
+  const { redirect }: { redirect?: string } = Route.useSearch();
 
   const form = useAppForm({
     defaultValues: {
@@ -37,11 +37,10 @@ function SignInPage() {
     },
     onSubmit: async ({ value }) => {
       setAuthError(undefined);
-      await authClient.signIn.email(
+      const result = await authClient.signIn.email(
         {
           email: value.email,
           password: value.password,
-          callbackURL: redirect ?? "/home", // Redirect after successful sign-in
         },
         {
           onError: (context) => {
@@ -49,6 +48,11 @@ function SignInPage() {
           },
         },
       );
+
+      if (result.data) {
+        // Force a full page reload to refresh auth context
+        globalThis.location.assign(redirect ?? "/home");
+      }
     },
   });
 

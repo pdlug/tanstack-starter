@@ -68,7 +68,7 @@ function TextArea({ label, disabled, placeholder, rows = 4 }: TextAreaProps) {
         disabled={disabled}
         placeholder={placeholder}
         rows={rows}
-        className="resize-vertical w-full rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none"
+        className="w-full rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none"
       />
       <FormMessage field={field} />
     </div>

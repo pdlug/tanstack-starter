@@ -1,7 +1,3 @@
-/**
- * Formats an array of form errors into a user-friendly string
- * Handles various error types including strings, objects with message property, and unknown types
- */
 export function formatFormErrors(errors: readonly unknown[]): string {
   if (errors.length === 0) return "";
 

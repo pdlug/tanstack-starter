@@ -1,6 +1,8 @@
 import { z } from "zod";
 
-import { useAppForm } from "./form";
+import { PostCreationError } from "@/lib/errors";
+
+import { useAppForm } from "./Form";
 
 const postFormSchema = z.object({
   title: z
@@ -18,9 +20,10 @@ export type PostFormValues = z.infer<typeof postFormSchema>;
 type PostFormProps = Readonly<{
   onSubmit: (data: PostFormValues) => Promise<void>;
   isSubmitting?: boolean;
+  onError?: (_error: Readonly<PostCreationError>) => void;
 }>;
 
-export function PostForm({ onSubmit, isSubmitting }: PostFormProps) {
+export function PostForm({ onSubmit, isSubmitting, onError }: PostFormProps) {
   const form = useAppForm({
     defaultValues: {
       title: "",
@@ -30,8 +33,16 @@ export function PostForm({ onSubmit, isSubmitting }: PostFormProps) {
       onBlur: postFormSchema,
     },
     onSubmit: async ({ value }) => {
-      await onSubmit(value);
-      form.reset();
+      try {
+        await onSubmit(value);
+        form.reset();
+      } catch (error) {
+        const postError =
+          error instanceof PostCreationError ? error : (
+            new PostCreationError("Failed to create post", { cause: error })
+          );
+        onError?.(postError);
+      }
     },
   });
 
@@ -51,7 +62,7 @@ export function PostForm({ onSubmit, isSubmitting }: PostFormProps) {
             <field.TextField
               label="Title"
               placeholder="Enter post title..."
-              disabled={isSubmitting}
+              disabled={!!isSubmitting}
             />
           )}
         </form.AppField>
@@ -62,7 +73,7 @@ export function PostForm({ onSubmit, isSubmitting }: PostFormProps) {
               label="Content"
               placeholder="Write your post content..."
               rows={6}
-              disabled={isSubmitting}
+              disabled={!!isSubmitting}
             />
           )}
         </form.AppField>

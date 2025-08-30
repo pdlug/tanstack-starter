@@ -1,3 +1,13 @@
 import { createAuthClient } from "better-auth/react";
 
-export const authClient = createAuthClient({});
+function getBaseURL() {
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+  if (globalThis.window === undefined) {
+    return "http://localhost:3000";
+  }
+  return globalThis.location.origin;
+}
+
+export const authClient = createAuthClient({
+  baseURL: getBaseURL(),
+});

@@ -16,10 +16,11 @@ export default defineConfig({
     tsconfigPaths(),
     tailwindcss(),
     tanstackStart({
-      target: "cloudflare-module",
-      customViteReactPlugin: true,
+      srcDirectory: "src",
+      start: { entry: "./start.tsx" },
+      server: { entry: "./server.ts" },
     }),
     viteReact(),
-    cloudflare(),
+    cloudflare({ viteEnvironment: { name: "ssr" } }),
   ],
 });
