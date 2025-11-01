@@ -12,6 +12,7 @@ import type { DB } from "@/db/db";
  * Keep this in sync with src/lib/auth.ts structure but without runtime dependencies.
  */
 export const auth = betterAuth({
+  secret: "development",
   emailAndPassword: {
     enabled: true,
   },

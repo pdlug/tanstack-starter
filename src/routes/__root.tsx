@@ -8,7 +8,7 @@ import {
   Scripts,
   useRouter,
 } from "@tanstack/react-router";
-import type { ReactNode } from "react";
+import { type ReactNode, useState } from "react";
 
 import { Header } from "@/components/Header";
 import { APP_NAME } from "@/config";
@@ -16,8 +16,6 @@ import { authClient } from "@/lib/auth/auth-client";
 import { getAuthSession } from "@/lib/auth/functions/get-auth-session";
 import appCss from "@/styles/index.css?url";
 import type { MaybeAuthSession } from "@/types/auth";
-
-const queryClient = new QueryClient();
 
 export const Route = createRootRoute({
   beforeLoad: async () => {
@@ -44,6 +42,7 @@ export const Route = createRootRoute({
 });
 
 function RootComponent() {
+  const [queryClient] = useState(() => new QueryClient());
   return (
     <QueryClientProvider client={queryClient}>
       <RootDocument>

@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { z } from "zod";
 
@@ -67,12 +67,12 @@ function SignUpPage() {
           </h2>
           <p className="mt-2 text-center text-sm text-gray-600">
             Already have an account?{" "}
-            <a
-              href="/sign-in"
+            <Link
+              to="/sign-in"
               className="font-medium text-blue-600 hover:text-blue-500"
             >
               Sign in
-            </a>
+            </Link>
           </p>
         </div>
 

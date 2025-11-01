@@ -1,34 +1,48 @@
+import "@/types/tanstack-start";
+
 import { createMiddleware } from "@tanstack/react-start";
-import { getRequest } from "@tanstack/react-start/server";
 
-import { auth } from "@/lib/auth/auth";
+import { getAuth } from "@/lib/auth/auth";
+import { MissingContextError, UnauthorizedError } from "@/lib/errors";
+import {
+  isServerContext,
+  type ServerRequestContext,
+} from "@/types/server-context";
 
-// Session middleware: retrieves auth session from request headers
-export const sessionMiddleware = createMiddleware().server(async ({ next }) => {
-  const request = getRequest();
+export const sessionRequestMiddleware = createMiddleware({
+  type: "request",
+}).server(async ({ request, context, next }) => {
+  if (!isServerContext(context)) {
+    throw new MissingContextError("Failed to access Cloudflare bindings");
+  }
+  const context_ = context as ServerRequestContext;
 
+  const auth = getAuth(context_.env);
   const session = await auth.api.getSession({
     headers: request.headers,
   });
 
   return next({
     context: {
-      authSession: session,
+      authSession: session ?? undefined,
     },
   });
 });
 
-// Server function middleware: ensures a session exists for function execution
-export const authMiddleware = createMiddleware({ type: "function" })
-  .middleware([sessionMiddleware])
-  .server(async ({ next, context }) => {
-    if (!context.authSession) {
-      throw new Error("Unauthorized: Authentication required");
+export const authMiddleware = createMiddleware({ type: "function" }).server(
+  async ({ next, context }) => {
+    if (!isServerContext(context)) {
+      throw new UnauthorizedError("Authentication required");
+    }
+    const context_ = context as ServerRequestContext;
+    if (!context_.authSession) {
+      throw new UnauthorizedError("Authentication required");
     }
 
     return next({
       context: {
-        authSession: context.authSession,
+        authSession: context_.authSession,
       },
     });
-  });
+  },
+);

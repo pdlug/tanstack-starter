@@ -66,20 +66,13 @@ const getPosts = createServerFn({ method: "GET" })
     return result.data;
   });
 
-// Zero-arg consumer wrapper to keep callsites clean
-const fetchPosts = () =>
-  getPosts({ data: undefined } as unknown as Parameters<typeof getPosts>[0]);
-
 export const Route = createFileRoute("/_authed/home")({
   component: Home,
   loader: async () => {
-    const posts = (await fetchPosts()) as Post[];
+    const posts = await getPosts();
     return { posts };
   },
 });
-
-const createPostFetch = (data: PostFormValues) =>
-  createPost({ data } as Parameters<typeof createPost>[0]);
 
 function Home() {
   const { authSession } = Route.useRouteContext();
@@ -88,8 +81,8 @@ function Home() {
   const router = useRouter();
 
   const { mutateAsync, isPending } = useMutation({
-    mutationFn: (_options: { data: PostFormValues }) =>
-      createPostFetch(_options.data),
+    mutationFn: async (formValues: PostFormValues) =>
+      createPost({ data: formValues }),
     onSuccess: () => {
       void router.invalidate();
     },
@@ -97,7 +90,7 @@ function Home() {
 
   async function handlePostSubmit(data: PostFormValues) {
     try {
-      await mutateAsync({ data });
+      await mutateAsync(data);
     } catch (error) {
       throw new PostCreationError("Failed to submit post", { cause: error });
     }

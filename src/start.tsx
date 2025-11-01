@@ -1,19 +1,10 @@
 import { createStart } from "@tanstack/react-start";
 
-import type { MaybeAuthSession } from "@/types/auth";
+import { sessionRequestMiddleware } from "@/lib/auth/middleware";
 
 export const startInstance = createStart(() => {
   return {
     defaultSsr: true,
+    requestMiddleware: [sessionRequestMiddleware],
   };
 });
-
-declare module "@tanstack/react-router" {
-  interface Register {
-    router: {
-      context: {
-        authSession: MaybeAuthSession;
-      };
-    };
-  }
-}

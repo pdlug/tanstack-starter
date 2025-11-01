@@ -1,23 +1,46 @@
+import type { BetterAuthPlugin } from "better-auth";
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { reactStartCookies } from "better-auth/react-start";
 
 import { connectToDB } from "@/db/db";
-import { getBindings } from "@/utils/bindings";
+import { resolveServerEnv } from "@/env/server";
 
-/**
- * Better Auth configuration for runtime use
- *
- * Note: Keep auth.cli.ts in sync with this config structure
- * for CLI schema generation compatibility.
- */
-export const auth = betterAuth({
-  baseURL: process.env.BETTER_AUTH_URL ?? "http://localhost:3000",
-  emailAndPassword: {
-    enabled: true,
-  },
-  database: drizzleAdapter(connectToDB(getBindings().DB), {
-    provider: "sqlite",
-  }),
-  plugins: [reactStartCookies()],
-});
+type AuthInstance = ReturnType<typeof betterAuth>;
+
+// Cache variables must be mutable for singleton pattern
+// eslint-disable-next-line functional/no-let
+let cachedAuth: AuthInstance | undefined;
+// eslint-disable-next-line functional/no-let
+let cachedEnvKey: string | undefined;
+
+function createAuthInstance(
+  env: Env,
+  runtimeEnv: ReturnType<typeof resolveServerEnv>,
+): AuthInstance {
+  const cookiesPlugin = reactStartCookies() as unknown as BetterAuthPlugin;
+
+  return betterAuth({
+    baseURL: runtimeEnv.BETTER_AUTH_URL ?? runtimeEnv.VITE_BASE_URL,
+    secret: runtimeEnv.BETTER_AUTH_SECRET,
+    emailAndPassword: {
+      enabled: true,
+    },
+    database: drizzleAdapter(connectToDB(env.DB), {
+      provider: "sqlite",
+    }),
+    plugins: [cookiesPlugin],
+  });
+}
+
+export function getAuth(env: Env): AuthInstance {
+  const runtimeEnv = resolveServerEnv(env);
+  const envKey = `${runtimeEnv.BETTER_AUTH_SECRET}:${runtimeEnv.BETTER_AUTH_URL ?? runtimeEnv.VITE_BASE_URL}`;
+
+  if (!cachedAuth || cachedEnvKey !== envKey) {
+    cachedAuth = createAuthInstance(env, runtimeEnv);
+    cachedEnvKey = envKey;
+  }
+
+  return cachedAuth;
+}
