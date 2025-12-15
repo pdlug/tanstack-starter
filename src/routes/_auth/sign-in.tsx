@@ -13,11 +13,11 @@ const signinSchema = z.object({
 
 export const Route = createFileRoute("/_auth/sign-in")({
   validateSearch: z.object({
-    redirect: z.string().optional(),
+    redirectTo: z.string().optional(),
   }),
   beforeLoad: ({ context: { authSession }, search }) => {
     if (authSession) {
-      throw redirect({ to: search.redirect ?? "/home" });
+      throw redirect({ to: search.redirectTo ?? "/home" });
     }
   },
   component: SignInPage,
@@ -25,7 +25,7 @@ export const Route = createFileRoute("/_auth/sign-in")({
 
 function SignInPage() {
   const [authError, setAuthError] = useState<string | undefined>();
-  const { redirect }: { redirect?: string } = Route.useSearch();
+  const { redirectTo }: { redirectTo?: string } = Route.useSearch();
 
   const form = useAppForm({
     defaultValues: {
@@ -51,7 +51,7 @@ function SignInPage() {
 
       if (result.data) {
         // Force a full page reload to refresh auth context
-        globalThis.location.assign(redirect ?? "/home");
+        globalThis.location.assign(redirectTo ?? "/home");
       }
     },
   });

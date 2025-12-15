@@ -1,7 +1,7 @@
 import type { BetterAuthPlugin } from "better-auth";
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
-import { reactStartCookies } from "better-auth/react-start";
+import { tanstackStartCookies } from "better-auth/tanstack-start";
 
 import { connectToDB } from "@/db/db";
 import { resolveServerEnv } from "@/env/server";
@@ -18,7 +18,7 @@ function createAuthInstance(
   env: Env,
   runtimeEnv: ReturnType<typeof resolveServerEnv>,
 ): AuthInstance {
-  const cookiesPlugin = reactStartCookies() as unknown as BetterAuthPlugin;
+  const cookiesPlugin = tanstackStartCookies() as unknown as BetterAuthPlugin;
 
   return betterAuth({
     baseURL: runtimeEnv.BETTER_AUTH_URL ?? runtimeEnv.VITE_BASE_URL,

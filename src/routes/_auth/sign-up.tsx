@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, redirect } from "@tanstack/react-router";
 import { useState } from "react";
 import { z } from "zod";
 
@@ -19,11 +19,20 @@ const signupSchema = z
   });
 
 export const Route = createFileRoute("/_auth/sign-up")({
+  validateSearch: z.object({
+    redirectTo: z.string().optional(),
+  }),
+  beforeLoad: ({ context: { authSession }, search }) => {
+    if (authSession) {
+      throw redirect({ to: search.redirectTo ?? "/home" });
+    }
+  },
   component: SignUpPage,
 });
 
 function SignUpPage() {
   const [authError, setAuthError] = useState<string | undefined>();
+  const { redirectTo }: { redirectTo?: string } = Route.useSearch();
 
   const form = useAppForm({
     defaultValues: {
@@ -44,11 +53,8 @@ function SignUpPage() {
           name: value.name,
         },
         {
-          onRequest: () => {
-            //show loading
-          },
           onSuccess: () => {
-            globalThis.location.assign("/home");
+            globalThis.location.assign(redirectTo ?? "/home");
           },
           onError: (context) => {
             setAuthError(context.error.message);

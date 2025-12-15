@@ -5,10 +5,20 @@ import { getRequest } from "@tanstack/react-start/server";
 
 import { getAuth } from "@/lib/auth/auth";
 import { MissingContextError } from "@/lib/errors";
+import type { AuthSession } from "@/types/auth";
 import {
   isServerContext,
   type ServerRequestContext,
 } from "@/types/server-context";
+
+function normalizeAuthSession(
+  session: Readonly<{ user: Readonly<{ id: string; email?: string }> }>,
+): AuthSession {
+  const { id, email } = session.user;
+  return {
+    user: email === undefined ? { id } : { id, email },
+  };
+}
 
 export const getAuthSession = createServerFn({ method: "GET" }).handler(
   async ({ context }) => {
@@ -18,11 +28,7 @@ export const getAuthSession = createServerFn({ method: "GET" }).handler(
     const context_ = context as ServerRequestContext;
 
     if (context_.authSession) {
-      return {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        session: context_.authSession.session as any,
-        user: context_.authSession.user,
-      };
+      return normalizeAuthSession(context_.authSession);
     }
 
     const request = getRequest();
@@ -32,10 +38,6 @@ export const getAuthSession = createServerFn({ method: "GET" }).handler(
     });
 
     if (!session) return;
-    return {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      session: session.session as any,
-      user: session.user,
-    };
+    return normalizeAuthSession(session);
   },
 );

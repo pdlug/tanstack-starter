@@ -5,7 +5,6 @@ export type AuthUser = Readonly<{
 
 export type AuthSession = Readonly<{
   user: AuthUser;
-  session?: unknown;
 }>;
 
 export type MaybeAuthSession = AuthSession | undefined;

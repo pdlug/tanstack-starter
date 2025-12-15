@@ -168,7 +168,6 @@ export default tseslint.config(
   },
   {
     files: [
-      "src/global-middleware.ts",
       "src/lib/auth/**/*.ts",
       "src/lib/middleware.ts",
       "src/routes/api/auth/$.ts",

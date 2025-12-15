@@ -1,9 +1,11 @@
 import { createAuthClient } from "better-auth/react";
 
+import { env } from "@/env/client";
+
 function getBaseURL() {
   // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
   if (globalThis.window === undefined) {
-    return "http://localhost:3000";
+    return env.VITE_BASE_URL;
   }
   return globalThis.location.origin;
 }

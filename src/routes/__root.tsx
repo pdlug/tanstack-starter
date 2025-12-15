@@ -11,6 +11,7 @@ import {
 import { type ReactNode, useState } from "react";
 
 import { Header } from "@/components/Header";
+import { NotFound } from "@/components/NotFound";
 import { APP_NAME } from "@/config";
 import { authClient } from "@/lib/auth/auth-client";
 import { getAuthSession } from "@/lib/auth/functions/get-auth-session";
@@ -38,7 +39,7 @@ export const Route = createRootRoute({
     links: [{ rel: "stylesheet", href: appCss }],
   }),
   component: RootComponent,
-  notFoundComponent: () => <div>Not found</div>,
+  notFoundComponent: () => <NotFound />,
 });
 
 function RootComponent() {

@@ -1,23 +1,23 @@
 # Authentication Middleware
 
-This project uses TanStack Start middleware for authentication with Better Auth.
+This project uses Better Auth with TanStack Start middleware.
 
 ## Architecture
 
 The middleware is designed for efficiency:
 
-- **Global Session Fetching**: `sessionMiddleware` runs globally and fetches the session ONCE per request
-- **Lightweight Auth Checking**: `requireAuthMiddleware` just validates the already-fetched session
+- **Global session fetching**: `sessionRequestMiddleware` runs as request middleware (configured in `src/start.tsx`) and fetches the session **once per request**, exposing it as `context.authSession`.
+- **Lightweight auth checking**: `authMiddleware` is function middleware used on protected server functions. It only validates the already-fetched session.
 
 ## Available Middleware
 
-### `sessionMiddleware` (Global)
+### `sessionRequestMiddleware` (request)
 
-Fetches the Better Auth session and provides it as context. Runs automatically on all routes.
+Fetches the Better Auth session and provides it as context. Runs automatically on all requests.
 
-### `requireAuthMiddleware` / `authMiddleware`
+### `authMiddleware` (function)
 
-Lightweight middleware that requires authentication. Throws an error if no valid session exists. Does NOT re-fetch the session.
+Requires authentication. Throws `UnauthorizedError` if no valid session exists. Does **not** re-fetch the session.
 
 ## Usage Examples
 
@@ -37,7 +37,7 @@ const protectedServerFn = createServerFn({ method: "POST" })
 
 ### Optional Authentication
 
-For routes that don't require auth, just use the global session context:
+For routes or functions that don't require auth, use the global session context:
 
 ```typescript
 const publicServerFn = createServerFn({ method: "GET" }).handler(async ({ context }) => {
@@ -50,20 +50,7 @@ const publicServerFn = createServerFn({ method: "GET" }).handler(async ({ contex
 });
 ```
 
-## Performance Benefits
+## Notes
 
-- ✅ Session decoded **once per request** (global middleware)
-- ✅ Auth checks are lightweight validation only
-- ✅ No duplicate session fetching on protected routes
-- ✅ Automatic session context on ALL server functions
-
-## Type Safety Benefits
-
-- ✅ **`authMiddleware`**: TypeScript guarantees `context.authSession` is non-null
-- ✅ **`sessionMiddleware`**: TypeScript correctly shows `context.authSession` can be null
-- ✅ **Global middleware**: All routes get session context automatically
-- ✅ **No type assertions needed**: Middleware handles type narrowing
-
-## Global Middleware
-
-Global middleware automatically provides session context to all server functions via `src/global-middleware.ts`. Protected routes add `authMiddleware` for validation only.
+- Loaders and server functions can read `context.authSession` without additional calls.
+- The `getAuthSession` server function in `src/lib/auth/functions/get-auth-session.ts` is used in the root route to hydrate client-side router context.

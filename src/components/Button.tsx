@@ -2,9 +2,9 @@ import type { VariantProps } from "class-variance-authority";
 import { cva } from "class-variance-authority";
 import type { ButtonHTMLAttributes, PropsWithChildren } from "react";
 
-import { cn } from "@/utils/tailwind";
+import { cn } from "@/lib/utils/tailwind";
 
-const buttonVariants = cva(
+export const buttonVariants = cva(
   "inline-flex items-center justify-center font-medium transition-colors focus:ring-2 focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50",
   {
     variants: {

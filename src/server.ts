@@ -7,24 +7,21 @@ import {
 
 const startHandler = createStartHandler(defaultStreamHandler);
 
-// Note: ServerEntry type from @tanstack/react-start/server-entry is available
-// but incompatible with Cloudflare Workers signature (Request, Env, ExecutionContext)
-// vs TanStack's expected signature (Request, opts?). Type assertion needed because
-// module augmentation doesn't fully propagate to this context.
+// Type assertion bridges Cloudflare Workers and TanStack Start signatures.
+// Cloudflare Workers: (Request, Env, ExecutionContext)
+// TanStack Start: (Request, { context })
+// Module augmentation in @/types/tanstack-start extends the context type,
+// but doesn't fully propagate here, requiring this assertion.
+type StartHandlerOptions = Parameters<typeof startHandler>[1];
+
 export default {
   fetch(
     request: Readonly<Request>,
     env: Readonly<Env>,
     executionContext: Readonly<ExecutionContext>,
   ) {
-    // Type assertion needed to bridge Cloudflare Workers and TanStack Start types
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
     return startHandler(request, {
-      context: {
-        env,
-        executionCtx: executionContext,
-      },
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } as any);
+      context: { env, executionCtx: executionContext },
+    } as unknown as StartHandlerOptions);
   },
 };
