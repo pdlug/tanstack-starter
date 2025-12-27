@@ -16,8 +16,14 @@ import {
 import { dbMiddleware } from "@/lib/middleware";
 
 const postSchema = z.object({
-  title: z.string(),
-  content: z.string(),
+  title: z
+    .string()
+    .min(1, "Title is required")
+    .max(100, "Title must be less than 100 characters"),
+  content: z
+    .string()
+    .min(1, "Content is required")
+    .max(1000, "Content must be less than 1000 characters"),
 });
 
 const createPost = createServerFn({ method: "POST" })

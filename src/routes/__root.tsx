@@ -62,8 +62,15 @@ function RootDocument({ children }: Readonly<{ children: ReactNode }>) {
   const router = useRouter();
 
   function handleLogout() {
-    void authClient.signOut();
-    router.history.push("/");
+    void (async () => {
+      try {
+        await authClient.signOut();
+      } catch (error) {
+        console.error("[auth] Failed to sign out", error);
+      } finally {
+        router.history.push("/");
+      }
+    })();
   }
 
   const user = authSession?.user;

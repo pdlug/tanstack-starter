@@ -18,13 +18,35 @@ const signupSchema = z
     path: ["confirmPassword"],
   });
 
+function normalizeRedirectTo(
+  redirectTo: string | undefined,
+): string | undefined {
+  if (!redirectTo) return undefined;
+
+  try {
+    const baseUrl = new URL("http://localhost");
+    const resolvedUrl = new URL(redirectTo, baseUrl);
+
+    if (resolvedUrl.origin !== baseUrl.origin) return undefined;
+
+    const normalized = `${resolvedUrl.pathname}${resolvedUrl.search}${resolvedUrl.hash}`;
+    if (!normalized.startsWith("/") || normalized.startsWith("//"))
+      return undefined;
+
+    return normalized;
+  } catch {
+    return undefined;
+  }
+}
+
 export const Route = createFileRoute("/_auth/sign-up")({
   validateSearch: z.object({
     redirectTo: z.string().optional(),
   }),
   beforeLoad: ({ context: { authSession }, search }) => {
+    const safeRedirectTo = normalizeRedirectTo(search.redirectTo);
     if (authSession) {
-      throw redirect({ to: search.redirectTo ?? "/home" });
+      throw redirect({ to: safeRedirectTo ?? "/home" });
     }
   },
   component: SignUpPage,
@@ -33,6 +55,7 @@ export const Route = createFileRoute("/_auth/sign-up")({
 function SignUpPage() {
   const [authError, setAuthError] = useState<string | undefined>();
   const { redirectTo }: { redirectTo?: string } = Route.useSearch();
+  const safeRedirectTo = normalizeRedirectTo(redirectTo);
 
   const form = useAppForm({
     defaultValues: {
@@ -54,7 +77,7 @@ function SignUpPage() {
         },
         {
           onSuccess: () => {
-            globalThis.location.assign(redirectTo ?? "/home");
+            globalThis.location.assign(safeRedirectTo ?? "/home");
           },
           onError: (context) => {
             setAuthError(context.error.message);

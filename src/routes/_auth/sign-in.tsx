@@ -11,13 +11,35 @@ const signinSchema = z.object({
   password: z.string().min(1, "Password is required"),
 });
 
+function normalizeRedirectTo(
+  redirectTo: string | undefined,
+): string | undefined {
+  if (!redirectTo) return undefined;
+
+  try {
+    const baseUrl = new URL("http://localhost");
+    const resolvedUrl = new URL(redirectTo, baseUrl);
+
+    if (resolvedUrl.origin !== baseUrl.origin) return undefined;
+
+    const normalized = `${resolvedUrl.pathname}${resolvedUrl.search}${resolvedUrl.hash}`;
+    if (!normalized.startsWith("/") || normalized.startsWith("//"))
+      return undefined;
+
+    return normalized;
+  } catch {
+    return undefined;
+  }
+}
+
 export const Route = createFileRoute("/_auth/sign-in")({
   validateSearch: z.object({
     redirectTo: z.string().optional(),
   }),
   beforeLoad: ({ context: { authSession }, search }) => {
+    const safeRedirectTo = normalizeRedirectTo(search.redirectTo);
     if (authSession) {
-      throw redirect({ to: search.redirectTo ?? "/home" });
+      throw redirect({ to: safeRedirectTo ?? "/home" });
     }
   },
   component: SignInPage,
@@ -26,6 +48,7 @@ export const Route = createFileRoute("/_auth/sign-in")({
 function SignInPage() {
   const [authError, setAuthError] = useState<string | undefined>();
   const { redirectTo }: { redirectTo?: string } = Route.useSearch();
+  const safeRedirectTo = normalizeRedirectTo(redirectTo);
 
   const form = useAppForm({
     defaultValues: {
@@ -51,7 +74,7 @@ function SignInPage() {
 
       if (result.data) {
         // Force a full page reload to refresh auth context
-        globalThis.location.assign(redirectTo ?? "/home");
+        globalThis.location.assign(safeRedirectTo ?? "/home");
       }
     },
   });
