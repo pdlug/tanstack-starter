@@ -1,5 +1,3 @@
-import "@/types/tanstack-start";
-
 import { createMiddleware } from "@tanstack/react-start";
 
 import { connectToDB } from "@/db/db";

@@ -1,17 +1,26 @@
-import "@/types/tanstack-start";
-
 import {
   createStartHandler,
   defaultStreamHandler,
 } from "@tanstack/react-start/server";
 
+import type { DB } from "@/db/db";
+import type { MaybeAuthSession } from "@/types/auth";
+
+declare module "@tanstack/react-start" {
+  interface Register {
+    server: {
+      requestContext: {
+        env: Env;
+        executionCtx: ExecutionContext;
+        authSession?: MaybeAuthSession;
+        db?: DB;
+      };
+    };
+  }
+}
+
 const startHandler = createStartHandler(defaultStreamHandler);
 
-// Type assertion bridges Cloudflare Workers and TanStack Start signatures.
-// Cloudflare Workers: (Request, Env, ExecutionContext)
-// TanStack Start: (Request, { context })
-// Module augmentation in @/types/tanstack-start extends the context type,
-// but doesn't fully propagate here, requiring this assertion.
 type StartHandlerOptions = Parameters<typeof startHandler>[1];
 
 export default {

@@ -23,7 +23,10 @@ export function NotFound({ children }: NotFoundProps) {
         >
           Go back
         </Button>
-        <Link to="/" className={buttonVariants({ variant: "primary", size: "sm" })}>
+        <Link
+          to="/"
+          className={buttonVariants({ variant: "primary", size: "sm" })}
+        >
           Start Over
         </Link>
       </div>

@@ -1,7 +1,5 @@
-import "@/types/tanstack-start";
-
 import { createServerFn } from "@tanstack/react-start";
-import { getRequest } from "@tanstack/react-start/server";
+import { getRequestHeaders } from "@tanstack/react-start/server";
 
 import { getAuth } from "@/lib/auth/auth";
 import { MissingContextError } from "@/lib/errors";
@@ -31,13 +29,18 @@ export const getAuthSession = createServerFn({ method: "GET" }).handler(
       return normalizeAuthSession(context_.authSession);
     }
 
-    const request = getRequest();
-    const auth = getAuth(context_.env);
-    const session = await auth.api.getSession({
-      headers: request.headers,
-    });
+    try {
+      const auth = getAuth(context_.env);
+      const session = await auth.api.getSession({
+        headers: getRequestHeaders(),
+      });
 
-    if (!session) return;
-    return normalizeAuthSession(session);
+      if (!session) return;
+      return normalizeAuthSession(session);
+    } catch (error) {
+      // Better Auth may throw errors without proper status codes
+      console.error("[getAuthSession] Auth error:", error);
+      return;
+    }
   },
 );

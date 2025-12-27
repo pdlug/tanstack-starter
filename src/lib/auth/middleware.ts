@@ -1,6 +1,5 @@
-import "@/types/tanstack-start";
-
 import { createMiddleware } from "@tanstack/react-start";
+import { getRequestHeaders } from "@tanstack/react-start/server";
 
 import { getAuth } from "@/lib/auth/auth";
 import { MissingContextError, UnauthorizedError } from "@/lib/errors";
@@ -11,22 +10,33 @@ import {
 
 export const sessionRequestMiddleware = createMiddleware({
   type: "request",
-}).server(async ({ request, context, next }) => {
+}).server(async ({ context, next }) => {
   if (!isServerContext(context)) {
     throw new MissingContextError("Failed to access Cloudflare bindings");
   }
   const context_ = context as ServerRequestContext;
 
-  const auth = getAuth(context_.env);
-  const session = await auth.api.getSession({
-    headers: request.headers,
-  });
+  try {
+    const auth = getAuth(context_.env);
+    const session = await auth.api.getSession({
+      headers: getRequestHeaders(),
+    });
 
-  return next({
-    context: {
-      authSession: session ?? undefined,
-    },
-  });
+    return await next({
+      context: {
+        authSession: session ?? undefined,
+      },
+    });
+  } catch (error) {
+    // Better Auth may throw errors without proper status codes
+    // Log and continue without session rather than crashing
+    console.error("[sessionMiddleware] Auth error:", error);
+    return next({
+      context: {
+        authSession: undefined,
+      },
+    });
+  }
 });
 
 export const authMiddleware = createMiddleware({ type: "function" }).server(

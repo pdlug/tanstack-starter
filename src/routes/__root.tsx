@@ -2,7 +2,7 @@
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import {
-  createRootRoute,
+  createRootRouteWithContext,
   HeadContent,
   Outlet,
   Scripts,
@@ -18,7 +18,11 @@ import { getAuthSession } from "@/lib/auth/functions/get-auth-session";
 import appCss from "@/styles/index.css?url";
 import type { MaybeAuthSession } from "@/types/auth";
 
-export const Route = createRootRoute({
+type RouterContext = Readonly<{
+  authSession: MaybeAuthSession;
+}>;
+
+export const Route = createRootRouteWithContext<RouterContext>()({
   beforeLoad: async () => {
     const authSession = await getAuthSession();
     return { authSession };
@@ -54,8 +58,7 @@ function RootComponent() {
 }
 
 function RootDocument({ children }: Readonly<{ children: ReactNode }>) {
-  const { authSession }: { authSession: MaybeAuthSession } =
-    Route.useRouteContext();
+  const { authSession } = Route.useRouteContext();
   const router = useRouter();
 
   function handleLogout() {

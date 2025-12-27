@@ -6,7 +6,7 @@ import { NotFound } from "@/components/NotFound";
 import { routeTree } from "./routeTree.gen";
 
 export function getRouter() {
-  const router = createRouter({
+  return createRouter({
     routeTree,
     context: {
       authSession: undefined,
@@ -16,5 +16,10 @@ export function getRouter() {
     defaultNotFoundComponent: () => <NotFound />,
     scrollRestoration: true,
   });
-  return router;
+}
+
+declare module "@tanstack/react-router" {
+  interface Register {
+    router: ReturnType<typeof getRouter>;
+  }
 }

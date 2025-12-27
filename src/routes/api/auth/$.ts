@@ -1,5 +1,3 @@
-import "@/types/tanstack-start";
-
 import { createFileRoute } from "@tanstack/react-router";
 
 import { getAuth } from "@/lib/auth/auth";
