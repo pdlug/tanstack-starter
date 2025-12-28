@@ -1,4 +1,9 @@
-import { createFileRoute, Link, redirect } from "@tanstack/react-router";
+import {
+  createFileRoute,
+  Link,
+  redirect,
+  useNavigate,
+} from "@tanstack/react-router";
 import { useState } from "react";
 import { z } from "zod";
 
@@ -35,6 +40,7 @@ function SignUpPage() {
   const [authError, setAuthError] = useState<string | undefined>();
   const { redirectTo }: { redirectTo?: string } = Route.useSearch();
   const safeRedirectTo = normalizeRedirectTo(redirectTo);
+  const navigate = useNavigate();
 
   const form = useAppForm({
     defaultValues: {
@@ -56,7 +62,10 @@ function SignUpPage() {
         },
         {
           onSuccess: () => {
-            globalThis.location.assign(safeRedirectTo ?? "/home");
+            void navigate({
+              to: safeRedirectTo ?? "/home",
+              reloadDocument: true,
+            });
           },
           onError: (context) => {
             setAuthError(context.error.message);

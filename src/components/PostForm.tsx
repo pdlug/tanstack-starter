@@ -1,5 +1,5 @@
 import { PostCreationError } from "@/lib/errors";
-import { type PostFormValues,postSchema } from "@/lib/validation";
+import { type PostFormValues, postSchema } from "@/lib/validation";
 
 import { useAppForm } from "./Form";
 

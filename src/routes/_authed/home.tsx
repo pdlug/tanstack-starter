@@ -1,10 +1,10 @@
-import { useMutation } from "@tanstack/react-query";
 import {
   createFileRoute,
   type ErrorComponentProps,
   useRouter,
 } from "@tanstack/react-router";
 import { createServerFn } from "@tanstack/react-start";
+import { useState } from "react";
 
 import { DefaultCatchBoundary } from "@/components/DefaultCatchBoundary";
 import { PostForm } from "@/components/PostForm";
@@ -17,7 +17,7 @@ import {
   UnauthorizedError,
 } from "@/lib/errors";
 import { dbMiddleware } from "@/lib/middleware";
-import { type PostFormValues,postSchema } from "@/lib/validation";
+import { type PostFormValues, postSchema } from "@/lib/validation";
 
 const createPost = createServerFn({ method: "POST" })
   .middleware([authMiddleware, dbMiddleware])
@@ -78,22 +78,18 @@ export const Route = createFileRoute("/_authed/home")({
 function Home() {
   const { authSession } = Route.useRouteContext();
   const { posts } = Route.useLoaderData();
-
   const router = useRouter();
-
-  const { mutateAsync, isPending } = useMutation({
-    mutationFn: async (formValues: PostFormValues) =>
-      createPost({ data: formValues }),
-    onSuccess: () => {
-      void router.invalidate();
-    },
-  });
+  const [isPending, setIsPending] = useState(false);
 
   async function handlePostSubmit(data: PostFormValues) {
+    setIsPending(true);
     try {
-      await mutateAsync(data);
+      await createPost({ data });
+      void router.invalidate();
     } catch (error) {
       throw new PostCreationError("Failed to submit post", { cause: error });
+    } finally {
+      setIsPending(false);
     }
   }
 

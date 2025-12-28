@@ -1,6 +1,5 @@
 /// <reference types="vite/client" />
 
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import {
   createRootRouteWithContext,
   HeadContent,
@@ -8,7 +7,7 @@ import {
   Scripts,
   useRouter,
 } from "@tanstack/react-router";
-import { type ReactNode, useState } from "react";
+import type { ReactNode } from "react";
 
 import { DefaultCatchBoundary } from "@/components/DefaultCatchBoundary";
 import { Header } from "@/components/Header";
@@ -50,13 +49,10 @@ export const Route = createRootRouteWithContext<RouterContext>()({
 });
 
 function RootComponent() {
-  const [queryClient] = useState(() => new QueryClient());
   return (
-    <QueryClientProvider client={queryClient}>
-      <RootDocument>
-        <Outlet />
-      </RootDocument>
-    </QueryClientProvider>
+    <RootDocument>
+      <Outlet />
+    </RootDocument>
   );
 }
 
