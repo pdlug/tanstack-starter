@@ -1,6 +1,6 @@
 import { createFormHook, createFormHookContexts } from "@tanstack/react-form";
 
-import { formatFormErrors } from "@/utils/form-errors";
+import { formatFormErrors } from "@/utils";
 
 const { fieldContext, formContext, useFieldContext } = createFormHookContexts();
 

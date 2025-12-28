@@ -4,28 +4,35 @@ import { cloudflare } from "@cloudflare/vite-plugin";
 import tailwindcss from "@tailwindcss/vite";
 import { tanstackStart } from "@tanstack/react-start/plugin/vite";
 import viteReact from "@vitejs/plugin-react";
-import { defineConfig } from "vite";
+import { type ConfigEnv, defineConfig, type UserConfig } from "vite";
 
-export default defineConfig({
-  server: {
-    port: 3000,
-  },
-  resolve: {
-    alias: {
-      "@": path.resolve(import.meta.dirname, "./src"),
+function createViteConfig(configEnv: Readonly<ConfigEnv>): UserConfig {
+  const isVitest = process.env.VITEST === "true" || configEnv.mode === "test";
+
+  return {
+    server: {
+      port: 3000,
     },
-  },
-  optimizeDeps: {
-    exclude: ["wrangler"],
-  },
-  plugins: [
-    tailwindcss(),
-    tanstackStart({
-      srcDirectory: "src",
-      start: { entry: "./start.tsx" },
-      server: { entry: "./server.ts" },
-    }),
-    viteReact(),
-    cloudflare({ viteEnvironment: { name: "ssr" } }),
-  ],
-});
+    resolve: {
+      alias: {
+        "@": path.resolve(import.meta.dirname, "./src"),
+      },
+    },
+    optimizeDeps: {
+      exclude: ["wrangler"],
+    },
+    plugins: [
+      tailwindcss(),
+      tanstackStart({
+        srcDirectory: "src",
+        start: { entry: "./start.tsx" },
+        server: { entry: "./server.ts" },
+      }),
+      viteReact(),
+      // Cloudflare plugin rejects Vitest's Node externals.
+      ...(isVitest ? [] : [cloudflare({ viteEnvironment: { name: "ssr" } })]),
+    ],
+  };
+}
+
+export default defineConfig(createViteConfig);

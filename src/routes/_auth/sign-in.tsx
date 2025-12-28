@@ -4,33 +4,12 @@ import { z } from "zod";
 
 import { useAppForm } from "@/components/Form";
 import { authClient } from "@/lib/auth/auth-client";
-import { formatFormErrors } from "@/utils/form-errors";
+import { formatFormErrors, normalizeRedirectTo } from "@/utils";
 
 const signinSchema = z.object({
   email: z.email("Invalid email address"),
   password: z.string().min(1, "Password is required"),
 });
-
-function normalizeRedirectTo(
-  redirectTo: string | undefined,
-): string | undefined {
-  if (!redirectTo) return undefined;
-
-  try {
-    const baseUrl = new URL("http://localhost");
-    const resolvedUrl = new URL(redirectTo, baseUrl);
-
-    if (resolvedUrl.origin !== baseUrl.origin) return undefined;
-
-    const normalized = `${resolvedUrl.pathname}${resolvedUrl.search}${resolvedUrl.hash}`;
-    if (!normalized.startsWith("/") || normalized.startsWith("//"))
-      return undefined;
-
-    return normalized;
-  } catch {
-    return undefined;
-  }
-}
 
 export const Route = createFileRoute("/_auth/sign-in")({
   validateSearch: z.object({

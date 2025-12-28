@@ -10,6 +10,7 @@ import {
 } from "@tanstack/react-router";
 import { type ReactNode, useState } from "react";
 
+import { DefaultCatchBoundary } from "@/components/DefaultCatchBoundary";
 import { Header } from "@/components/Header";
 import { NotFound } from "@/components/NotFound";
 import { APP_NAME } from "@/config";
@@ -44,6 +45,8 @@ export const Route = createRootRouteWithContext<RouterContext>()({
   }),
   component: RootComponent,
   notFoundComponent: () => <NotFound />,
+  errorComponent: DefaultCatchBoundary,
+  pendingComponent: RootPending,
 });
 
 function RootComponent() {
@@ -95,5 +98,17 @@ function RootDocument({ children }: Readonly<{ children: ReactNode }>) {
         <Scripts />
       </body>
     </html>
+  );
+}
+
+function RootPending() {
+  return (
+    <RootDocument>
+      <div className="space-y-3" aria-busy="true">
+        <div className="h-4 w-2/3 animate-pulse rounded bg-gray-200" />
+        <div className="h-4 w-1/2 animate-pulse rounded bg-gray-200" />
+        <div className="h-4 w-5/6 animate-pulse rounded bg-gray-200" />
+      </div>
+    </RootDocument>
   );
 }

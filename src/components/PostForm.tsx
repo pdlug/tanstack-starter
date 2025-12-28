@@ -1,21 +1,7 @@
-import { z } from "zod";
-
 import { PostCreationError } from "@/lib/errors";
+import { type PostFormValues,postSchema } from "@/lib/validation";
 
 import { useAppForm } from "./Form";
-
-const postFormSchema = z.object({
-  title: z
-    .string()
-    .min(1, "Title is required")
-    .max(100, "Title must be less than 100 characters"),
-  content: z
-    .string()
-    .min(1, "Content is required")
-    .max(1000, "Content must be less than 1000 characters"),
-});
-
-export type PostFormValues = z.infer<typeof postFormSchema>;
 
 type PostFormProps = Readonly<{
   onSubmit: (data: PostFormValues) => Promise<void>;
@@ -30,7 +16,7 @@ export function PostForm({ onSubmit, isSubmitting, onError }: PostFormProps) {
       content: "",
     },
     validators: {
-      onBlur: postFormSchema,
+      onBlur: postSchema,
     },
     onSubmit: async ({ value }) => {
       try {

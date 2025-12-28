@@ -1,9 +1,12 @@
 import { useMutation } from "@tanstack/react-query";
-import { createFileRoute, useRouter } from "@tanstack/react-router";
+import {
+  createFileRoute,
+  type ErrorComponentProps,
+  useRouter,
+} from "@tanstack/react-router";
 import { createServerFn } from "@tanstack/react-start";
-import { z } from "zod";
 
-import type { PostFormValues } from "@/components/PostForm";
+import { DefaultCatchBoundary } from "@/components/DefaultCatchBoundary";
 import { PostForm } from "@/components/PostForm";
 import { createPostForUser, getPostsForUser } from "@/db/posts";
 import type { Post } from "@/db/schema";
@@ -14,17 +17,7 @@ import {
   UnauthorizedError,
 } from "@/lib/errors";
 import { dbMiddleware } from "@/lib/middleware";
-
-const postSchema = z.object({
-  title: z
-    .string()
-    .min(1, "Title is required")
-    .max(100, "Title must be less than 100 characters"),
-  content: z
-    .string()
-    .min(1, "Content is required")
-    .max(1000, "Content must be less than 1000 characters"),
-});
+import { type PostFormValues,postSchema } from "@/lib/validation";
 
 const createPost = createServerFn({ method: "POST" })
   .middleware([authMiddleware, dbMiddleware])
@@ -78,6 +71,8 @@ export const Route = createFileRoute("/_authed/home")({
     const posts = await getPosts();
     return { posts };
   },
+  pendingComponent: HomePending,
+  errorComponent: HomeErrorBoundary,
 });
 
 function Home() {
@@ -133,4 +128,29 @@ function Home() {
       </div>
     </div>
   );
+}
+
+function HomePending() {
+  return (
+    <div className="mx-auto max-w-4xl p-8" aria-busy="true">
+      <div className="mb-8 h-9 w-64 animate-pulse rounded bg-gray-200" />
+      <div className="mb-8 space-y-3 rounded-lg border p-6">
+        <div className="h-6 w-40 animate-pulse rounded bg-gray-200" />
+        <div className="h-10 w-full animate-pulse rounded bg-gray-200" />
+        <div className="h-32 w-full animate-pulse rounded bg-gray-200" />
+        <div className="h-9 w-28 animate-pulse rounded bg-gray-200" />
+      </div>
+      <div className="space-y-4">
+        <div className="h-7 w-32 animate-pulse rounded bg-gray-200" />
+        <div className="space-y-3">
+          <div className="h-20 w-full animate-pulse rounded bg-gray-200" />
+          <div className="h-20 w-full animate-pulse rounded bg-gray-200" />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function HomeErrorBoundary(props: ErrorComponentProps) {
+  return <DefaultCatchBoundary {...props} />;
 }
