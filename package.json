@@ -31,10 +31,10 @@
   "packageManager": "pnpm@10.26.2",
   "dependencies": {
     "@t3-oss/env-core": "^0.13.10",
-    "@tanstack/react-form": "^1.27.6",
+    "@tanstack/react-form": "^1.27.7",
     "@tanstack/react-router": "^1.144.0",
-    "@tanstack/react-start": "^1.145.0",
-    "better-auth": "^1.4.9",
+    "@tanstack/react-start": "^1.145.3",
+    "better-auth": "^1.4.10",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "drizzle-orm": "^0.45.1",
@@ -43,7 +43,7 @@
     "tailwind-merge": "^3.4.0",
     "tailwindcss": "^4.1.18",
     "vite": "^7.3.0",
-    "zod": "^4.2.1"
+    "zod": "^4.3.4"
   },
   "devDependencies": {
     "@cloudflare/vite-plugin": "^1.19.0",
@@ -69,8 +69,8 @@
     "prettier-plugin-tailwindcss": "^0.7.2",
     "tsx": "^4.21.0",
     "typescript": "^5.9.3",
-    "typescript-eslint": "^8.50.1",
-    "vitest": "^4.0.0",
+    "typescript-eslint": "^8.51.0",
+    "vitest": "^4.0.16",
     "wrangler": "^4.56.0"
   }
 }
