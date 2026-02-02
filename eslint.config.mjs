@@ -153,6 +153,8 @@ export default tseslint.config(
       // TanStack Start server functions have type issues
       "@typescript-eslint/no-unsafe-call": "off",
       "@typescript-eslint/no-unsafe-member-access": "off",
+      // TanStack Start routes export Route config alongside local component functions
+      "react-refresh/only-export-components": "off",
     },
   },
   {
