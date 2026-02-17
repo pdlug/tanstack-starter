@@ -131,9 +131,7 @@ export default tseslint.config(
           },
         },
       ],
-      // Disabled due to bug in typescript-eslint@8.46.2
-      // https://github.com/typescript-eslint/typescript-eslint/issues/...
-      "@typescript-eslint/unified-signatures": "off",
+      "@typescript-eslint/unified-signatures": "error",
     },
   },
   {

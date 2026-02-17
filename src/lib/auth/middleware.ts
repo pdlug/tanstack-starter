@@ -8,12 +8,45 @@ import {
   type ServerRequestContext,
 } from "@/types/server-context";
 
+const SESSION_LOOKUP_BYPASS_PATHS = new Set<string>([
+  "/api/auth",
+  "/favicon.ico",
+  "/robots.txt",
+  "/sitemap.xml",
+]);
+
+const SESSION_LOOKUP_BYPASS_PREFIXES: readonly string[] = [
+  "/api/auth/",
+  "/assets/",
+];
+const STATIC_FILE_PATH_PATTERN = /\/[^/?]+\.[a-z\d]+$/iu;
+
+export function shouldSkipSessionLookup(pathname: string): boolean {
+  if (SESSION_LOOKUP_BYPASS_PATHS.has(pathname)) return true;
+  if (
+    SESSION_LOOKUP_BYPASS_PREFIXES.some((prefix) => pathname.startsWith(prefix))
+  ) {
+    return true;
+  }
+
+  return STATIC_FILE_PATH_PATTERN.test(pathname);
+}
+
 export const sessionRequestMiddleware = createMiddleware({
   type: "request",
-}).server(async ({ context, next }) => {
+}).server(async ({ context, next, pathname }) => {
   if (!isServerContext(context)) {
     throw new MissingContextError("Failed to access Cloudflare bindings");
   }
+
+  if (shouldSkipSessionLookup(pathname)) {
+    return next({
+      context: {
+        authSession: undefined,
+      },
+    });
+  }
+
   const context_ = context as ServerRequestContext;
 
   try {
