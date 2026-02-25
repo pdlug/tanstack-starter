@@ -1,3 +1,5 @@
+import "@tanstack/react-start/server-only";
+
 import { drizzle } from "drizzle-orm/d1";
 
 import * as schema from "./schema/index";

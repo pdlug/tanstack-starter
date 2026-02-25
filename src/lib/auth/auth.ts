@@ -1,3 +1,5 @@
+import "@tanstack/react-start/server-only";
+
 import type { BetterAuthPlugin } from "better-auth";
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";

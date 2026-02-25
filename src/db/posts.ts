@@ -1,3 +1,5 @@
+import "@tanstack/react-start/server-only";
+
 import { eq } from "drizzle-orm";
 
 import type { Result } from "@/lib/errors";
