@@ -5,7 +5,6 @@ import configPrettier from "eslint-config-prettier";
 import unicorn from "eslint-plugin-unicorn";
 import functional from "eslint-plugin-functional";
 import pluginRouter from "@tanstack/eslint-plugin-router";
-import react from "eslint-plugin-react";
 import reactHooks from "eslint-plugin-react-hooks";
 import reactRefresh from "eslint-plugin-react-refresh";
 import simpleImportSort from "eslint-plugin-simple-import-sort";
@@ -25,8 +24,6 @@ export default tseslint.config(
   functional.configs.lite,
   functional.configs.stylistic,
   ...pluginRouter.configs["flat/recommended"],
-  react.configs.flat.recommended,
-  react.configs.flat["jsx-runtime"],
 
   {
     ignores: [
@@ -41,7 +38,6 @@ export default tseslint.config(
     ],
   },
   {
-    // files: ["{src}/**/*.{js,jsx,ts,tsx}"],
     languageOptions: {
       parser: tseslint.parser,
       parserOptions: {
@@ -52,15 +48,9 @@ export default tseslint.config(
   },
   {
     plugins: {
-      react,
       "react-hooks": reactHooks,
       "react-refresh": reactRefresh,
       "simple-import-sort": simpleImportSort,
-    },
-    settings: {
-      react: {
-        version: "detect",
-      },
     },
   },
   {
@@ -86,9 +76,6 @@ export default tseslint.config(
           ignoreIdentifierPattern: "displayName",
         },
       ],
-      "react/react-in-jsx-scope": "off",
-      "react/prefer-read-only-props": "error",
-      "react/no-unescaped-entities": "off",
       "react-hooks/rules-of-hooks": "error",
       "react-hooks/exhaustive-deps": "warn",
       "react-refresh/only-export-components": "warn",
@@ -145,25 +132,10 @@ export default tseslint.config(
     files: ["src/routes/**/*.{js,jsx,ts,tsx}"],
     rules: {
       "@typescript-eslint/only-throw-error": "off",
-      // Tanstack Router uses errors for notFound and other exceptions
+      // TanStack Router uses errors for notFound and other exceptions
       "functional/no-throw-statements": "off",
-      "react/no-unescaped-entities": "off",
-      // TanStack Start server functions have type issues
-      "@typescript-eslint/no-unsafe-call": "off",
-      "@typescript-eslint/no-unsafe-member-access": "off",
       // TanStack Start routes export Route config alongside local component functions
       "react-refresh/only-export-components": "off",
-    },
-  },
-  {
-    files: ["src/routes/_authed/home.tsx"],
-    rules: {
-      "@typescript-eslint/no-unsafe-assignment": "off",
-      "@typescript-eslint/no-unsafe-call": "off",
-      "@typescript-eslint/no-unsafe-argument": "off",
-      "@typescript-eslint/prefer-optional-chain": "off",
-      "@typescript-eslint/no-unnecessary-condition": "off",
-      "functional/prefer-immutable-types": "off",
     },
   },
   {
@@ -173,11 +145,8 @@ export default tseslint.config(
       "src/routes/api/auth/$.ts",
     ],
     rules: {
-      // TanStack Start framework has type issues
-      "@typescript-eslint/no-unsafe-call": "off",
+      // Cloudflare Env type is mutable; middleware context requires unsafe assignment
       "@typescript-eslint/no-unsafe-assignment": "off",
-      "@typescript-eslint/no-unsafe-member-access": "off",
-      "@typescript-eslint/no-unsafe-argument": "off",
       "functional/prefer-immutable-types": "off",
     },
   },

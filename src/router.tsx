@@ -12,6 +12,7 @@ export function getRouter() {
       authSession: undefined,
     },
     defaultPreload: "intent",
+    defaultStaleReloadMode: "blocking",
     defaultErrorComponent: DefaultCatchBoundary,
     defaultNotFoundComponent: () => <NotFound />,
     scrollRestoration: true,

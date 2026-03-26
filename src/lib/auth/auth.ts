@@ -8,18 +8,16 @@ import { tanstackStartCookies } from "better-auth/tanstack-start";
 import { connectToDB } from "@/db/db";
 import { resolveServerEnv } from "@/env/server";
 
-type AuthInstance = ReturnType<typeof betterAuth>;
-
 // Cache variables must be mutable for singleton pattern
 // eslint-disable-next-line functional/no-let
-let cachedAuth: AuthInstance | undefined;
+let cachedAuth: ReturnType<typeof createAuthInstance> | undefined;
 // eslint-disable-next-line functional/no-let
 let cachedEnvKey: string | undefined;
 
 function createAuthInstance(
   env: Env,
   runtimeEnv: ReturnType<typeof resolveServerEnv>,
-): AuthInstance {
+) {
   const cookiesPlugin = tanstackStartCookies() as unknown as BetterAuthPlugin;
 
   return betterAuth({
@@ -35,7 +33,7 @@ function createAuthInstance(
   });
 }
 
-export function getAuth(env: Env): AuthInstance {
+export function getAuth(env: Env) {
   const runtimeEnv = resolveServerEnv(env);
   const envKey = `${runtimeEnv.BETTER_AUTH_SECRET}:${runtimeEnv.BETTER_AUTH_URL ?? runtimeEnv.VITE_BASE_URL}`;
 

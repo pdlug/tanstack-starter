@@ -11,11 +11,7 @@ import { PostForm } from "@/components/PostForm";
 import { createPostForUser, getPostsForUser } from "@/db/posts";
 import type { Post } from "@/db/schema";
 import { authMiddleware } from "@/lib/auth/middleware";
-import {
-  DatabaseError,
-  PostCreationError,
-  UnauthorizedError,
-} from "@/lib/errors";
+import { PostCreationError } from "@/lib/errors";
 import { dbMiddleware } from "@/lib/middleware";
 import { type PostFormValues, postSchema } from "@/lib/validation";
 
@@ -23,13 +19,6 @@ const createPost = createServerFn({ method: "POST" })
   .middleware([authMiddleware, dbMiddleware])
   .inputValidator(postSchema)
   .handler(async ({ data: post, context }) => {
-    if (!context.authSession || !context.authSession.user?.id) {
-      throw new UnauthorizedError("Authentication required");
-    }
-    if (!context.db) {
-      throw new DatabaseError("Database connection unavailable");
-    }
-
     const result = await createPostForUser(
       context.db,
       context.authSession.user.id,
@@ -46,13 +35,6 @@ const createPost = createServerFn({ method: "POST" })
 const getPosts = createServerFn({ method: "GET" })
   .middleware([authMiddleware, dbMiddleware])
   .handler(async ({ context }): Promise<Post[]> => {
-    if (!context.authSession || !context.authSession.user?.id) {
-      throw new UnauthorizedError("Authentication required");
-    }
-    if (!context.db) {
-      throw new DatabaseError("Database connection unavailable");
-    }
-
     const result = await getPostsForUser(
       context.db,
       context.authSession.user.id,
