@@ -18,7 +18,7 @@ Server functions - why have a separate API layer only your app is going to use i
 
 ## Prerequisites
 
-- **Node.js** 18+
+- **Node.js** 20+ (required by Vite 8)
 - **pnpm** (recommended package manager)
 - **Cloudflare account** (for deployment)
 
@@ -122,7 +122,7 @@ pnpm run db:generate
 pnpm run db:migrate:local
 
 # View local database
-npx wrangler d1 execute tanstack-starter-dev --local --command "SELECT * FROM users"
+npx wrangler d1 execute tanstack-starter-dev --local --command "SELECT * FROM user"
 ```
 
 ## Deployment
@@ -173,7 +173,7 @@ src/
 ├── lib/
 │   └── auth/          # Better Auth configuration
 ├── routes/            # File-based routes
-|── services/          # Business logic
+├── services/          # Business logic (convention — add as needed)
 ├── styles/            # Global styles
 └── utils/             # Utility functions
 ```
@@ -187,8 +187,9 @@ pnpm run deploy         # Build and deploy to Cloudflare
 pnpm run preview        # Preview production build locally
 
 # Database
-pnpm run db:generate    # Generate migration files
-pnpm run db:migrate     # Apply migrations
+pnpm run db:generate       # Generate migration files
+pnpm run db:migrate:local  # Apply migrations to local D1
+pnpm run db:migrate:remote # Apply migrations to remote D1
 
 # Code Quality
 pnpm run test           # Run all tests (type checking, linting, formatting)

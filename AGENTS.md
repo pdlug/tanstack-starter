@@ -12,14 +12,13 @@ alwaysApply: true
 
 # Tech Stack
 
-- **TanStack Start 1.0 RC** - File-based routing with TanStack Router
+- **TanStack Start** (1.x) - File-based routing with TanStack Router
   - Docs: https://tanstack.com/start/latest/docs/framework/react/overview
-  - Note: Significant changes from earlier versions - refer to current docs
+  - Note: APIs evolve quickly across minor versions - refer to current docs
 - **Zod** - Data validation and schema-first TypeScript types
 - **Drizzle ORM** - Database modeling with Cloudflare D1 (SQLite)
 - **Cloudflare Workers** - Deployment target
 - **TanStack Form v1** - Form handling with `createFormHook`
-- **TanStack Query** - Server state caching when needed
 - **Better Auth** - Authentication
 - **Tailwind CSS v4** - Styling
 
@@ -106,25 +105,25 @@ import { Button } from "./Button";
 - SHOULD include cause chain for debugging
 - MUST NOT use Result/Either in React components
 
-```typescript
-type Result<T, E = Error> = { success: true; data: T } | { success: false; error: E };
+`Result`, `safe`, and `unwrap` live in `src/lib/result.ts`.
 
-// Internal service - returns Result
-export async function createPost(db: DB, data: Post): Promise<Result<Post, DatabaseError>> {
-  try {
-    const [post] = await db.insert(posts).values(data).returning();
-    return { success: true, data: post };
-  } catch (error) {
-    return { success: false, error: new DatabaseError("Failed to create", { cause: error }) };
-  }
+```typescript
+import { safe, unwrap, type Result } from "@/lib/result";
+
+// Internal service - wrap fallible work with `safe`
+export function createPost(db: DB, data: NewPost): Promise<Result<Post, DatabaseError>> {
+  return safe(
+    async () => {
+      const [post] = await db.insert(posts).values(data).returning();
+      if (!post) throw new Error("insert returned no rows");
+      return post;
+    },
+    (cause) => new DatabaseError("Failed to create post", { cause }),
+  );
 }
 
-// Server function - throws at boundary
-export const createPostAction = createServerFn({ method: "POST" }).handler(async ({ data }) => {
-  const result = await createPost(db, data);
-  if (!result.success) throw result.error;
-  return result.data;
-});
+// Server function - `unwrap` rethrows the error at the framework boundary
+export const createPostAction = createServerFn({ method: "POST" }).handler(async ({ data }) => unwrap(await createPost(db, data)));
 ```
 
 # Project Structure
@@ -169,13 +168,11 @@ src/routes/_marketing/
 **Route definition:**
 
 ```typescript
+// Loaders call server functions; the DB connection comes from dbMiddleware,
+// not a connection string. See src/routes/_authed/home.tsx.
 export const Route = createFileRoute("/_authed/dashboard")({
   component: Dashboard,
-  loader: async ({ context }) => {
-    const db = connectToDb(process.env.DATABASE_URL!);
-    const posts = await Posts.getAll(db);
-    return { posts };
-  },
+  loader: async () => ({ posts: await getPosts() }),
 });
 
 function Dashboard() {
@@ -224,7 +221,7 @@ export function Card({ title, children }: CardProps) {
 ## Server State
 
 - MUST use TanStack Start loaders for initial data loading
-- SHOULD use TanStack Query for client-side caching when needed
+- Re-run loaders with `router.invalidate()` after mutations
 
 ## Server Functions
 
@@ -251,17 +248,16 @@ MUST move multi-step operations to `src/services/`:
 
 ```typescript
 // src/services/registration.ts
-export async function signUp(email: string, clerkId: string) {
-  await Users.createOrUpdate({ email, clerkId });
+export async function onUserRegistered(userId: string, email: string) {
   await Resend.createContact(email);
-  await PostHog.track("user.created", { email });
+  await PostHog.track("user.created", { userId, email });
 }
 
 // Server function
-export const handleSignUp = createServerFn({ method: "POST" })
-  .inputValidator(SignUpSchema)
+export const handleRegistered = createServerFn({ method: "POST" })
+  .inputValidator(RegisteredSchema)
   .handler(async ({ data }) => {
-    await signUp(data.email, data.clerkId);
+    await onUserRegistered(data.userId, data.email);
     return { success: true };
   });
 ```
@@ -273,7 +269,7 @@ _Rationale: Keeps server functions clean, enables testing, centralizes complex l
 MUST use TanStack Form with `createFormHook` pattern for consistent styling:
 
 ```typescript
-// src/components/form.tsx
+// src/components/Form.tsx
 import { createFormHook, createFormHookContexts } from "@tanstack/react-form"
 
 const { fieldContext, formContext, useFieldContext } = createFormHookContexts()
@@ -304,7 +300,7 @@ export const { useAppForm } = createFormHook({
 **Usage:**
 
 ```typescript
-import { useAppForm } from "@/components/form"
+import { useAppForm } from "@/components/Form"
 
 const formSchema = z.object({
   email: z.string().email(),
@@ -366,7 +362,6 @@ function Dashboard() {
 
 - SHOULD prefer server-side data fetching
 - SHOULD use React.memo sparingly - only for expensive renders
-- SHOULD use TanStack Query for client-side caching when appropriate
 - MUST use Suspense for loading states
 - MUST implement error boundaries at route level
 - SHOULD show loading skeletons over spinners

@@ -1,5 +1,7 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
+  // TODO: rename to your Worker's name before deploying (this becomes part of
+  // the *.workers.dev URL).
   "name": "my-app",
   "main": "src/server.ts",
   "compatibility_date": "2026-05-27",
@@ -11,13 +13,15 @@
     "enabled": true,
   },
   "vars": {
-    "BETTER_AUTH_URL": "",
+    // Dev base URL. In production set this to your deployed origin (and
+    // optionally add BETTER_AUTH_URL to override the Better Auth base URL).
     "VITE_BASE_URL": "http://localhost:3000",
   },
   "d1_databases": [
     {
       "binding": "DB",
       "database_name": "tanstack-starter-dev",
+      // TODO: replace with your own database_id from `wrangler d1 create`.
       "database_id": "e07a184d-dc49-49cc-b81e-238e43c74efe",
       "migrations_dir": "./drizzle",
     },
