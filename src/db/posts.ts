@@ -2,58 +2,34 @@ import "@tanstack/react-start/server-only";
 
 import { eq } from "drizzle-orm";
 
-import type { Result } from "@/lib/errors";
 import { DatabaseError } from "@/lib/errors";
+import { safe } from "@/lib/result";
 
 import type { DB } from "./db";
-import type { NewPost, Post } from "./schema";
+import type { NewPost } from "./schema";
 import { posts } from "./schema";
 
-export async function getPostsForUser(
-  db: DB,
-  userId: string,
-): Promise<Result<Post[], DatabaseError>> {
-  try {
-    const userPosts = await db
-      .select()
-      .from(posts)
-      .where(eq(posts.userId, userId));
-    return { success: true, data: userPosts };
-  } catch (error) {
-    return {
-      success: false,
-      error: new DatabaseError("Failed to retrieve posts", { cause: error }),
-    };
-  }
+export function getPostsForUser(db: DB, userId: string) {
+  return safe(
+    () => db.select().from(posts).where(eq(posts.userId, userId)),
+    (cause) => new DatabaseError("Failed to retrieve posts", { cause }),
+  );
 }
 
-export async function createPostForUser(
+export function createPostForUser(
   db: DB,
   userId: string,
   post: Omit<NewPost, "userId">,
-): Promise<Result<Post, DatabaseError>> {
-  try {
-    const [newPost] = await db
-      .insert(posts)
-      .values({
-        title: post.title,
-        content: post.content,
-        userId,
-      })
-      .returning();
-
-    if (!newPost) {
-      return {
-        success: false,
-        error: new DatabaseError("Failed to create post - no data returned"),
-      };
-    }
-
-    return { success: true, data: newPost };
-  } catch (error) {
-    return {
-      success: false,
-      error: new DatabaseError("Failed to create post", { cause: error }),
-    };
-  }
+) {
+  return safe(
+    async () => {
+      const [created] = await db
+        .insert(posts)
+        .values({ ...post, userId })
+        .returning();
+      if (!created) throw new Error("insert returned no rows");
+      return created;
+    },
+    (cause) => new DatabaseError("Failed to create post", { cause }),
+  );
 }

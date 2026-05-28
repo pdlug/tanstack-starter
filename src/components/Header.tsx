@@ -2,14 +2,9 @@ import { Link } from "@tanstack/react-router";
 
 import { Button } from "@/components/Button";
 import { APP_NAME } from "@/config";
+import type { AuthUser } from "@/types/auth";
 
-// Minimal user shape needed by the header
-type HeaderUser = Readonly<{
-  id: string;
-  email: string;
-  name?: string;
-  image?: string;
-}>;
+type HeaderUser = Pick<AuthUser, "id" | "email" | "name" | "image">;
 
 type AuthenticatedNavProps = Readonly<{
   onClickLogout: () => void;
@@ -54,29 +49,20 @@ function UnauthenticatedNav() {
 }
 
 export type HeaderProps = Readonly<{
-  isAuthenticated: boolean;
-  onClickLogout: () => void;
   user?: HeaderUser;
+  onClickLogout: () => void;
 }>;
 
-export function Header({ isAuthenticated, onClickLogout, user }: HeaderProps) {
+export function Header({ user, onClickLogout }: HeaderProps) {
   return (
     <header className="border-b border-gray-200 bg-white shadow-sm">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between">
-          <div className="flex items-center">
-            <Link to="/">
-              <h1 className="text-xl font-semibold text-gray-900">
-                {APP_NAME}
-              </h1>
-            </Link>
-          </div>
-
-          {isAuthenticated ?
-            <AuthenticatedNav
-              onClickLogout={onClickLogout}
-              {...(user && { user: user })}
-            />
+          <Link to="/">
+            <h1 className="text-xl font-semibold text-gray-900">{APP_NAME}</h1>
+          </Link>
+          {user ?
+            <AuthenticatedNav user={user} onClickLogout={onClickLogout} />
           : <UnauthenticatedNav />}
         </div>
       </div>

@@ -1,10 +1,12 @@
-import { createStart } from "@tanstack/react-start";
+import "@/types/server-context";
 
-import { sessionRequestMiddleware } from "@/lib/auth/middleware";
+import { createCsrfMiddleware, createStart } from "@tanstack/react-start";
 
-export const startInstance = createStart(() => {
-  return {
-    defaultSsr: true,
-    requestMiddleware: [sessionRequestMiddleware],
-  };
+const csrfMiddleware = createCsrfMiddleware({
+  filter: (context) => context.handlerType === "serverFn",
 });
+
+export const startInstance = createStart(() => ({
+  defaultSsr: true,
+  requestMiddleware: [csrfMiddleware],
+}));

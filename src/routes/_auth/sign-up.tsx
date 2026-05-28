@@ -7,78 +7,66 @@ import {
 import { useState } from "react";
 import { z } from "zod";
 
+import { AuthError } from "@/components/AuthError";
 import { useAppForm } from "@/components/Form";
 import { authClient } from "@/lib/auth/auth-client";
-import { formatFormErrors, normalizeRedirectTo } from "@/utils";
+import { normalizeRedirectTo } from "@/utils";
 
 const signupSchema = z
   .object({
+    name: z.string().min(2, "Name must be at least 2 characters"),
     email: z.email("Invalid email address"),
     password: z.string().min(8, "Password must be at least 8 characters"),
     confirmPassword: z.string(),
-    name: z.string().min(2, "Name must be at least 2 characters"),
   })
   .refine((data) => data.password === data.confirmPassword, {
     message: "Passwords don't match",
     path: ["confirmPassword"],
   });
 
+const searchSchema = z.object({ redirectTo: z.string().optional() });
+
 export const Route = createFileRoute("/_auth/sign-up")({
-  validateSearch: z.object({
-    redirectTo: z.string().optional(),
-  }),
+  validateSearch: searchSchema,
   beforeLoad: ({ context: { authSession }, search }) => {
-    const safeRedirectTo = normalizeRedirectTo(search.redirectTo);
     if (authSession) {
-      throw redirect({ to: safeRedirectTo ?? "/home" });
+      throw redirect({ to: normalizeRedirectTo(search.redirectTo) ?? "/home" });
     }
   },
   component: SignUpPage,
 });
 
 function SignUpPage() {
-  const [authError, setAuthError] = useState<string | undefined>();
-  const { redirectTo }: { redirectTo?: string } = Route.useSearch();
-  const safeRedirectTo = normalizeRedirectTo(redirectTo);
+  const { redirectTo } = Route.useSearch();
   const navigate = useNavigate();
+  const [authError, setAuthError] = useState<string | undefined>();
 
   const form = useAppForm({
-    defaultValues: {
-      email: "",
-      password: "",
-      confirmPassword: "",
-      name: "",
-    },
-    validators: {
-      onChange: signupSchema,
-    },
+    defaultValues: { name: "", email: "", password: "", confirmPassword: "" },
+    validators: { onChange: signupSchema },
     onSubmit: async ({ value }) => {
       setAuthError(undefined);
-      await authClient.signUp.email(
+      const { data } = await authClient.signUp.email(
+        { email: value.email, password: value.password, name: value.name },
         {
-          email: value.email,
-          password: value.password,
-          name: value.name,
-        },
-        {
-          onSuccess: () => {
-            void navigate({
-              to: safeRedirectTo ?? "/home",
-              reloadDocument: true,
-            });
-          },
           onError: (context) => {
             setAuthError(context.error.message);
           },
         },
       );
+      if (data) {
+        await navigate({
+          to: normalizeRedirectTo(redirectTo) ?? "/home",
+          reloadDocument: true,
+        });
+      }
     },
   });
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-50">
       <div className="w-full max-w-md space-y-8">
-        <div>
+        <header>
           <h2 className="mt-6 text-center text-3xl font-bold tracking-tight text-gray-900">
             Create your account
           </h2>
@@ -91,7 +79,7 @@ function SignUpPage() {
               Sign in
             </Link>
           </p>
-        </div>
+        </header>
 
         <form
           onSubmit={(event) => {
@@ -142,25 +130,18 @@ function SignUpPage() {
             </form.AppField>
           </div>
 
-          <div>
-            <button
-              type="submit"
-              disabled={!form.state.canSubmit}
-              className="group relative flex w-full justify-center rounded-md bg-blue-600 px-3 py-2 text-sm font-semibold text-white hover:bg-blue-500 focus-visible:outline focus-visible:outline-offset-2 focus-visible:outline-blue-600 disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              {form.state.isSubmitting ?
-                "Creating account..."
-              : "Create account"}
-            </button>
-          </div>
+          <button
+            type="submit"
+            disabled={!form.state.canSubmit}
+            className="group relative flex w-full justify-center rounded-md bg-blue-600 px-3 py-2 text-sm font-semibold text-white hover:bg-blue-500 focus-visible:outline focus-visible:outline-offset-2 focus-visible:outline-blue-600 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {form.state.isSubmitting ? "Creating account..." : "Create account"}
+          </button>
 
-          {(form.state.errors.length > 0 || authError) && (
-            <div className="rounded-md bg-red-50 p-4">
-              <div className="text-sm text-red-700">
-                {authError ?? formatFormErrors(form.state.errors)}
-              </div>
-            </div>
-          )}
+          <AuthError
+            {...(authError && { authError })}
+            formErrors={form.state.errors}
+          />
         </form>
       </div>
     </div>

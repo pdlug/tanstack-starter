@@ -1,60 +1,35 @@
-import {
-  createFileRoute,
-  type ErrorComponentProps,
-  useRouter,
-} from "@tanstack/react-router";
+import { createFileRoute, useRouter } from "@tanstack/react-router";
 import { createServerFn } from "@tanstack/react-start";
 import { useState } from "react";
 
 import { DefaultCatchBoundary } from "@/components/DefaultCatchBoundary";
 import { PostForm } from "@/components/PostForm";
 import { createPostForUser, getPostsForUser } from "@/db/posts";
-import type { Post } from "@/db/schema";
 import { authMiddleware } from "@/lib/auth/middleware";
-import { PostCreationError } from "@/lib/errors";
 import { dbMiddleware } from "@/lib/middleware";
-import { type PostFormValues, postSchema } from "@/lib/validation";
+import { type PostFormValues, postSchema } from "@/lib/post-schema";
+import { unwrap } from "@/lib/result";
 
 const createPost = createServerFn({ method: "POST" })
   .middleware([authMiddleware, dbMiddleware])
   .inputValidator(postSchema)
-  .handler(async ({ data: post, context }) => {
-    const result = await createPostForUser(
-      context.db,
-      context.authSession.user.id,
-      post,
-    );
-
-    if (!result.success) {
-      throw result.error;
-    }
-
-    return result.data;
-  });
+  .handler(async ({ data, context }) =>
+    unwrap(
+      await createPostForUser(context.db, context.authSession.user.id, data),
+    ),
+  );
 
 const getPosts = createServerFn({ method: "GET" })
   .middleware([authMiddleware, dbMiddleware])
-  .handler(async ({ context }): Promise<Post[]> => {
-    const result = await getPostsForUser(
-      context.db,
-      context.authSession.user.id,
-    );
-
-    if (!result.success) {
-      throw result.error;
-    }
-
-    return result.data;
-  });
+  .handler(async ({ context }) =>
+    unwrap(await getPostsForUser(context.db, context.authSession.user.id)),
+  );
 
 export const Route = createFileRoute("/_authed/home")({
   component: Home,
-  loader: async () => {
-    const posts = await getPosts();
-    return { posts };
-  },
+  loader: async () => ({ posts: await getPosts() }),
   pendingComponent: HomePending,
-  errorComponent: HomeErrorBoundary,
+  errorComponent: DefaultCatchBoundary,
 });
 
 function Home() {
@@ -67,9 +42,7 @@ function Home() {
     setIsPending(true);
     try {
       await createPost({ data });
-      void router.invalidate();
-    } catch (error) {
-      throw new PostCreationError("Failed to submit post", { cause: error });
+      await router.invalidate();
     } finally {
       setIsPending(false);
     }
@@ -91,16 +64,16 @@ function Home() {
           <p className="text-gray-500">
             No posts yet. Create your first post above!
           </p>
-        : posts.map((post: Post) => (
-            <div key={post.id} className="rounded-lg border p-4">
+        : posts.map((post) => (
+            <article key={post.id} className="rounded-lg border p-4">
               <h3 className="text-xl font-semibold">{post.title}</h3>
               <p className="whitespace-pre-wrap text-gray-600">
                 {post.content}
               </p>
               <p className="mt-2 text-sm text-gray-400">
-                {new Date(post.createdAt).toLocaleDateString()}
+                {post.createdAt.toLocaleDateString()}
               </p>
-            </div>
+            </article>
           ))
         }
       </div>
@@ -127,8 +100,4 @@ function HomePending() {
       </div>
     </div>
   );
-}
-
-function HomeErrorBoundary(props: ErrorComponentProps) {
-  return <DefaultCatchBoundary {...props} />;
 }

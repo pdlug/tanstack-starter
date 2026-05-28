@@ -1,10 +1,14 @@
-import { createFormHook, createFormHookContexts } from "@tanstack/react-form";
+import {
+  type AnyFieldApi,
+  createFormHook,
+  createFormHookContexts,
+} from "@tanstack/react-form";
 
 import { formatFormErrors } from "@/utils";
 
 const { fieldContext, formContext, useFieldContext } = createFormHookContexts();
 
-export type TextFieldProps = Readonly<{
+type TextFieldProps = Readonly<{
   label: string;
   type?: "text" | "email" | "password";
   disabled?: boolean;
@@ -42,7 +46,7 @@ function TextField({
   );
 }
 
-export type TextAreaProps = Readonly<{
+type TextAreaProps = Readonly<{
   label: string;
   disabled?: boolean;
   placeholder?: string;
@@ -75,18 +79,7 @@ function TextArea({ label, disabled, placeholder, rows = 4 }: TextAreaProps) {
   );
 }
 
-export type FormMessageProps = Readonly<{
-  field: {
-    state: {
-      meta: {
-        errors: readonly unknown[];
-        isTouched: boolean;
-      };
-    };
-  };
-}>;
-
-function FormMessage({ field }: FormMessageProps) {
+function FormMessage({ field }: Readonly<{ field: AnyFieldApi }>) {
   if (field.state.meta.errors.length === 0 || !field.state.meta.isTouched)
     return;
 
@@ -98,10 +91,7 @@ function FormMessage({ field }: FormMessageProps) {
 }
 
 export const { useAppForm } = createFormHook({
-  fieldComponents: {
-    TextField,
-    TextArea,
-  },
+  fieldComponents: { TextField, TextArea },
   formComponents: {},
   fieldContext,
   formContext,

@@ -1,20 +1,15 @@
+const REDIRECT_BASE = new URL("http://localhost");
+
 export function normalizeRedirectTo(
   redirectTo: string | undefined,
 ): string | undefined {
-  if (!redirectTo) return undefined;
+  if (!redirectTo) return;
 
-  try {
-    const baseUrl = new URL("http://localhost");
-    const resolvedUrl = new URL(redirectTo, baseUrl);
+  const resolved = URL.parse(redirectTo, REDIRECT_BASE);
+  if (resolved?.origin !== REDIRECT_BASE.origin) return;
 
-    if (resolvedUrl.origin !== baseUrl.origin) return undefined;
+  const path = `${resolved.pathname}${resolved.search}${resolved.hash}`;
+  if (!path.startsWith("/") || path.startsWith("//")) return;
 
-    const normalized = `${resolvedUrl.pathname}${resolvedUrl.search}${resolvedUrl.hash}`;
-    if (!normalized.startsWith("/") || normalized.startsWith("//"))
-      return undefined;
-
-    return normalized;
-  } catch {
-    return undefined;
-  }
+  return path;
 }

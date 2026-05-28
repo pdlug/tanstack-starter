@@ -1,20 +1,12 @@
-/* eslint-disable functional/no-class-inheritance */
+/* eslint-disable functional/no-class-inheritance -- Error subclasses need real prototype chain for instanceof checks */
 
 export class AppError extends Error {
-  readonly statusCode: number;
   readonly status: number;
 
-  constructor(message: string, statusCode: number, options?: ErrorOptions) {
+  constructor(message: string, status: number, options?: ErrorOptions) {
     super(message, options);
     this.name = this.constructor.name;
-    this.statusCode = statusCode;
-    this.status = statusCode;
-  }
-}
-
-export class ValidationError extends AppError {
-  constructor(message: string, options?: ErrorOptions) {
-    super(message, 400, options);
+    this.status = status;
   }
 }
 
@@ -24,36 +16,8 @@ export class UnauthorizedError extends AppError {
   }
 }
 
-export class NotFoundError extends AppError {
-  constructor(message: string, options?: ErrorOptions) {
-    super(message, 404, options);
-  }
-}
-
-export class InternalError extends AppError {
-  constructor(message: string, options?: ErrorOptions) {
-    super(message, 500, options);
-  }
-}
-
-export class MissingContextError extends AppError {
-  constructor(message: string, options?: ErrorOptions) {
-    super(message, 500, options);
-  }
-}
-
-export class PostCreationError extends AppError {
-  constructor(message: string, options?: ErrorOptions) {
-    super(message, 500, options);
-  }
-}
-
 export class DatabaseError extends AppError {
   constructor(message: string, options?: ErrorOptions) {
     super(message, 500, options);
   }
 }
-
-export type Result<T, E = Error> =
-  | { success: true; data: T }
-  | { success: false; error: E };

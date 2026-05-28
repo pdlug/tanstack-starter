@@ -23,22 +23,12 @@ type RouterContext = Readonly<{
 }>;
 
 export const Route = createRootRouteWithContext<RouterContext>()({
-  beforeLoad: async () => {
-    const authSession = await getAuthSession();
-    return { authSession };
-  },
+  beforeLoad: async () => ({ authSession: await getAuthSession() }),
   head: () => ({
     meta: [
-      {
-        charSet: "utf8",
-      },
-      {
-        name: "viewport",
-        content: "width=device-width, initial-scale=1",
-      },
-      {
-        title: APP_NAME,
-      },
+      { charSet: "utf8" },
+      { name: "viewport", content: "width=device-width, initial-scale=1" },
+      { title: APP_NAME },
     ],
     links: [{ rel: "stylesheet", href: appCss }],
   }),
@@ -60,20 +50,16 @@ function RootDocument({ children }: Readonly<{ children: ReactNode }>) {
   const { authSession } = Route.useRouteContext();
   const router = useRouter();
 
-  function handleLogout() {
-    void (async () => {
-      try {
-        await authClient.signOut();
-      } catch (error) {
-        console.error("[auth] Failed to sign out", error);
-      } finally {
-        router.history.push("/");
-      }
-    })();
+  async function handleLogout() {
+    try {
+      await authClient.signOut();
+    } catch (error) {
+      console.error("[auth] Failed to sign out", error);
+    } finally {
+      await router.navigate({ to: "/" });
+      await router.invalidate();
+    }
   }
-
-  const user = authSession?.user;
-  const headerUser = user?.email ? { ...user, email: user.email } : undefined;
 
   return (
     <html>
@@ -83,9 +69,8 @@ function RootDocument({ children }: Readonly<{ children: ReactNode }>) {
       <body>
         <div className="min-h-screen bg-gray-50">
           <Header
-            isAuthenticated={!!authSession}
-            onClickLogout={handleLogout}
-            {...(headerUser && { user: headerUser })}
+            onClickLogout={() => void handleLogout()}
+            {...(authSession && { user: authSession.user })}
           />
           <main className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
             {children}

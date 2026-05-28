@@ -1,33 +1,28 @@
-import { PostCreationError } from "@/lib/errors";
-import { type PostFormValues, postSchema } from "@/lib/validation";
+import { useState } from "react";
 
-import { useAppForm } from "./Form";
+import { useAppForm } from "@/components/Form";
+import { type PostFormValues, postSchema } from "@/lib/post-schema";
 
 type PostFormProps = Readonly<{
   onSubmit: (data: PostFormValues) => Promise<void>;
   isSubmitting?: boolean;
-  onError?: (_error: Readonly<PostCreationError>) => void;
 }>;
 
-export function PostForm({ onSubmit, isSubmitting, onError }: PostFormProps) {
+export function PostForm({ onSubmit, isSubmitting = false }: PostFormProps) {
+  const [submitError, setSubmitError] = useState<string | undefined>();
+
   const form = useAppForm({
-    defaultValues: {
-      title: "",
-      content: "",
-    },
-    validators: {
-      onBlur: postSchema,
-    },
+    defaultValues: { title: "", content: "" },
+    validators: { onBlur: postSchema },
     onSubmit: async ({ value }) => {
+      setSubmitError(undefined);
       try {
         await onSubmit(value);
         form.reset();
       } catch (error) {
-        const postError =
-          error instanceof PostCreationError ? error : (
-            new PostCreationError("Failed to create post", { cause: error })
-          );
-        onError?.(postError);
+        setSubmitError(
+          error instanceof Error ? error.message : "Failed to create post",
+        );
       }
     },
   });
@@ -48,7 +43,7 @@ export function PostForm({ onSubmit, isSubmitting, onError }: PostFormProps) {
             <field.TextField
               label="Title"
               placeholder="Enter post title..."
-              disabled={!!isSubmitting}
+              disabled={isSubmitting}
             />
           )}
         </form.AppField>
@@ -59,7 +54,7 @@ export function PostForm({ onSubmit, isSubmitting, onError }: PostFormProps) {
               label="Content"
               placeholder="Write your post content..."
               rows={6}
-              disabled={!!isSubmitting}
+              disabled={isSubmitting}
             />
           )}
         </form.AppField>
@@ -71,6 +66,12 @@ export function PostForm({ onSubmit, isSubmitting, onError }: PostFormProps) {
         >
           {isSubmitting ? "Creating..." : "Create Post"}
         </button>
+
+        {submitError && (
+          <div className="rounded-md bg-red-50 p-4 text-sm text-red-700">
+            {submitError}
+          </div>
+        )}
       </form>
     </div>
   );
