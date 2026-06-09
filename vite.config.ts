@@ -7,7 +7,8 @@ import viteReact from "@vitejs/plugin-react";
 import { type ConfigEnv, defineConfig, type UserConfig } from "vite";
 
 function createViteConfig(configEnv: Readonly<ConfigEnv>): UserConfig {
-  const isVitest = process.env.VITEST === "true" || configEnv.mode === "test";
+  const isVitest =
+    process.env["VITEST"] === "true" || configEnv.mode === "test";
 
   return {
     server: {

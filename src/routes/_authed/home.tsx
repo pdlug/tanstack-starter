@@ -12,7 +12,7 @@ import { unwrap } from "@/lib/result";
 
 const createPost = createServerFn({ method: "POST" })
   .middleware([authMiddleware, dbMiddleware])
-  .inputValidator(postSchema)
+  .validator(postSchema)
   .handler(async ({ data, context }) =>
     unwrap(
       await createPostForUser(context.db, context.authSession.user.id, data),

@@ -234,7 +234,7 @@ const FormSchema = z.object({
 });
 
 export const handleSubmit = createServerFn({ method: "POST" })
-  .inputValidator(FormSchema)
+  .validator(FormSchema)
   .handler(async ({ data }) => {
     // For simple operations, implement inline
     await db.insert(contacts).values(data);
@@ -255,7 +255,7 @@ export async function onUserRegistered(userId: string, email: string) {
 
 // Server function
 export const handleRegistered = createServerFn({ method: "POST" })
-  .inputValidator(RegisteredSchema)
+  .validator(RegisteredSchema)
   .handler(async ({ data }) => {
     await onUserRegistered(data.userId, data.email);
     return { success: true };
