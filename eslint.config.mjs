@@ -93,7 +93,7 @@ export default tseslint.config(
       ],
       "unicorn/no-nested-ternary": "off",
       "unicorn/no-process-exit": "off",
-      "unicorn/prevent-abbreviations": [
+      "unicorn/name-replacements": [
         "error",
         {
           allowList: {
