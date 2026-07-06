@@ -1,6 +1,5 @@
 export type Result<T, E = Error> =
-  | Readonly<{ success: true; data: T }>
-  | Readonly<{ success: false; error: E }>;
+  Readonly<{ success: true; data: T }> | Readonly<{ success: false; error: E }>;
 
 export function unwrap<T, E extends Error>(result: Result<T, E>): T {
   if (result.success) return result.data;
