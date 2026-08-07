@@ -36,11 +36,12 @@ session explicitly instead:
 
 ```typescript
 import { getRequestHeaders } from "@tanstack/react-start/server";
+import { env } from "cloudflare:workers";
 
 import { resolveAuthSession } from "@/lib/auth/auth";
 
-const publicServerFn = createServerFn({ method: "GET" }).handler(async ({ context }) => {
-  const session = await resolveAuthSession(context.env, getRequestHeaders());
+const publicServerFn = createServerFn({ method: "GET" }).handler(async () => {
+  const session = await resolveAuthSession(env, getRequestHeaders());
   return { greeting: session ? `Hello ${session.user.email}` : "Hello" };
 });
 ```

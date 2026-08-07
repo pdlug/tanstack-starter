@@ -23,6 +23,7 @@
   "include": [
     "worker-configuration.d.ts",
     "src",
+    "scripts",
     "drizzle.config.ts",
     "vite.config.ts"
   ]

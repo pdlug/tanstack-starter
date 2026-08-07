@@ -191,6 +191,7 @@ pnpm run db:migrate:remote # Apply migrations to remote D1
 
 # Code Quality
 pnpm run test           # Run all tests (type checking, linting, formatting)
+pnpm run test:smoke     # Build and smoke-test the local Cloudflare Worker
 pnpm run fix            # Auto-fix formatting and linting issues
 
 # Auth
