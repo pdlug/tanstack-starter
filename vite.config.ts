@@ -23,15 +23,14 @@ function createViteConfig(configEnv: Readonly<ConfigEnv>): UserConfig {
       exclude: ["wrangler"],
     },
     plugins: [
+      // Cloudflare plugin rejects Vitest's Node externals.
+      ...(isVitest ? [] : [cloudflare({ viteEnvironment: { name: "ssr" } })]),
       tailwindcss(),
       tanstackStart({
         srcDirectory: "src",
         start: { entry: "./start.tsx" },
-        server: { entry: "./server.ts" },
       }),
       viteReact(),
-      // Cloudflare plugin rejects Vitest's Node externals.
-      ...(isVitest ? [] : [cloudflare({ viteEnvironment: { name: "ssr" } })]),
     ],
   };
 }
