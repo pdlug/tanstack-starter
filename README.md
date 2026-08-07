@@ -18,7 +18,7 @@ Server functions - why have a separate API layer only your app is going to use i
 
 ## Prerequisites
 
-- **Node.js** 20+ (required by Vite 8)
+- **Node.js** 20.19+ or 22.12+ (required by Vite 8)
 - **pnpm** (recommended package manager)
 - **Cloudflare account** (for deployment)
 
@@ -40,7 +40,7 @@ You'll need separate databases for development and production.
 
 ```bash
 # Create local D1 database for development
-npx wrangler d1 create tanstack-starter-dev
+pnpm exec wrangler d1 create tanstack-starter-dev
 
 # This will output database info including the database_id
 # Copy the database_id to your wrangler.jsonc
@@ -50,7 +50,7 @@ npx wrangler d1 create tanstack-starter-dev
 
 ```bash
 # Create production D1 database
-npx wrangler d1 create tanstack-starter-prod
+pnpm exec wrangler d1 create tanstack-starter-prod
 
 # Copy this database_id for production deployment
 ```
@@ -92,14 +92,14 @@ Update the `database_id` in `wrangler.jsonc` with your development database ID:
 pnpm run db:generate
 
 # Apply migrations to local D1 database
-npx wrangler d1 migrations apply tanstack-starter-dev --local
+pnpm run db:migrate:local
 ```
 
 #### For Production (before deploying)
 
 ```bash
 # Apply migrations to production D1 database
-npx wrangler d1 migrations apply tanstack-starter-prod
+pnpm run db:migrate:remote
 ```
 
 ## Development
@@ -122,7 +122,7 @@ pnpm run db:generate
 pnpm run db:migrate:local
 
 # View local database
-npx wrangler d1 execute tanstack-starter-dev --local --command "SELECT * FROM user"
+pnpm exec wrangler d1 execute tanstack-starter-dev --local --command "SELECT * FROM user"
 ```
 
 ## Deployment
@@ -138,15 +138,13 @@ For production deployment, update your `wrangler.jsonc` with the production data
 ```bash
 # Apply any pending migrations to production
 pnpm run db:migrate:remote
-# or
-npx wrangler d1 migrations apply tanstack-starter-prod
 ```
 
 ### 3. Set Production Environment Variables
 
 ```bash
 # Set production secrets
-npx wrangler secret put BETTER_AUTH_SECRET
+pnpm exec wrangler secret put BETTER_AUTH_SECRET
 ```
 
 ### 4. Deploy Application
@@ -158,7 +156,7 @@ pnpm run deploy
 This will:
 
 1. Build the application
-2. Deploy to Cloudflare Workers
+2. Deploy to Cloudflare Workers using the supported TanStack Start server entry
 3. Your app will be available at `https://your-app.your-subdomain.workers.dev`
 
 ## Project Structure
@@ -205,10 +203,22 @@ When you modify the database schema:
 
 1. **Update schema files** in `src/db/schema/`
 2. **Generate migration**: `pnpm run db:generate`
-3. **Apply locally**: `npx wrangler d1 migrations apply tanstack-starter-dev --local`
+3. **Apply locally**: `pnpm run db:migrate:local`
 4. **Test your changes** in development
-5. **Apply to production**: `npx wrangler d1 migrations apply tanstack-starter-prod`
+5. **Apply to production**: `pnpm run db:migrate:remote`
 6. **Deploy**: `pnpm run deploy`
+
+## Dependency Maintenance
+
+Run `pnpm outdated` and `pnpm audit` when updating this starter. The `pnpm.overrides`
+in `package.json` keep transitive dependencies on patched releases while upstream
+packages catch up:
+
+- `js-yaml` is pulled in by TanStack Start's build tooling.
+- `brace-expansion` is pulled in by the TanStack Router ESLint plugin.
+- The scoped `esbuild` override replaces the vulnerable version used by Drizzle
+  Kit's deprecated `@esbuild-kit` loader. Remove it when Drizzle Kit drops that
+  loader.
 
 ## Troubleshooting
 

@@ -1,5 +1,3 @@
-import "@/types/server-context";
-
 import { createCsrfMiddleware, createStart } from "@tanstack/react-start";
 
 const csrfMiddleware = createCsrfMiddleware({
@@ -7,6 +5,5 @@ const csrfMiddleware = createCsrfMiddleware({
 });
 
 export const startInstance = createStart(() => ({
-  defaultSsr: true,
   requestMiddleware: [csrfMiddleware],
 }));

@@ -3,12 +3,9 @@
   // TODO: rename to your Worker's name before deploying (this becomes part of
   // the *.workers.dev URL).
   "name": "my-app",
-  "main": "src/server.ts",
-  "compatibility_date": "2026-05-27",
+  "main": "@tanstack/react-start/server-entry",
+  "compatibility_date": "2026-08-07",
   "compatibility_flags": ["nodejs_compat"],
-  "assets": {
-    "directory": ".output/public",
-  },
   "observability": {
     "enabled": true,
   },
